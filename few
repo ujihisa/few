@@ -20,8 +20,8 @@ def few
   File.open(t.path, 'w') do |io|
     a = ARGF.read
     a = a.gsub(/\r?\n/, "<br />\n")
-    # TODO: use CSS; text-indent: xx em;
-    a = a.gsub(/^\s+/) {|m| '<font color=white>' + "_"*m.size  + '</font>' }
+    # a = a.gsub(/^\s+/) {|m| '<font color=white>' + "_"*m.size  + '</font>' }
+    a = a.gsub(/^\s+/) {|m| "&nbsp;"*m.size }
     io.puts <<-EOF
     <html>
       <head><title>#{ARGF.filename}</title></head>
