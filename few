@@ -14,27 +14,43 @@ def open_browser(path)
   end
 end
 
-t = Tempfile.new('few')
+def few
+  t = Tempfile.new('few')
 
-File.open(t.path, 'w') do |io|
-  a = ARGF.read
-  a = a.gsub(/\r?\n/, "<br />\n")
-  # TODO: use CSS; text-indent: xx em;
-  a = a.gsub(/^\s+/) {|m| '<font color=white>' + "_"*m.size  + '</font>' }
-  io.puts <<-EOF
-  <html>
-    <head><title>#{ARGF.filename}</title></head>
-    <body>
-    #{a}
-    </body>
-  </html>
-  EOF
+  File.open(t.path, 'w') do |io|
+    a = ARGF.read
+    a = a.gsub(/\r?\n/, "<br />\n")
+    # TODO: use CSS; text-indent: xx em;
+    a = a.gsub(/^\s+/) {|m| '<font color=white>' + "_"*m.size  + '</font>' }
+    io.puts <<-EOF
+    <html>
+      <head><title>#{ARGF.filename}</title></head>
+      <body>
+      #{a}
+      </body>
+    </html>
+    EOF
+  end
+
+  t.close
+
+  File.rename(t.path, html = t.path + '.html')
+
+  open_browser(html)
 end
 
-t.close
-
-File.rename(t.path, html = t.path + '.html')
-
-open_browser(html)
+case $0
+when __FILE__
+  few
+when /spec[^\/]*$/
+  describe 'few' do
+    it 'is awesome' do
+      def open_browser(path); path; end
+      def ARGF.read; 'a'; end
+      def ARGF.filename; 'b'; end
+      few.should be_an_instance_of(String)
+    end
+  end
+end
 
 # vim: set filetype=ruby :
