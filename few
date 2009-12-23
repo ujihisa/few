@@ -46,6 +46,12 @@ when __FILE__
     puts "[USAGE]: few {filename}"
   when '-v', '--version'
     puts "0.0.1"
+  when '--selfupdate'
+    require 'open-uri'
+    code = open('http://github.com/ujihisa/few/raw/master/few') {|io| io.read }
+    raise unless /^#!/ =~ code
+    File.open(__FILE__, 'w') {|io| io.print code }
+    system __FILE__, '-v'
   else
     few
   end
