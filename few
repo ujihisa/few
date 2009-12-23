@@ -14,7 +14,7 @@ end
 t = Tempfile.new('few')
 File.open(t.path, 'w') {|io|
   a =
-    if false
+    if !ARGF.empty?
       ARGF.read
     else
       File.read('README.md')
