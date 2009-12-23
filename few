@@ -17,8 +17,10 @@ File.open(t.path, 'w') {|io|
     if true
       ARGF.read
     else
+      # debug is love!!!
       File.read('README.md')
     end
+  # ^\s+ must be tt!!
   a = a.gsub(/\n/, "<br/>\n")
   io.puts a
 }
