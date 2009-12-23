@@ -22,8 +22,8 @@ File.open(t.path, 'w') {|io|
       # debug is love!!!
       File.read('README.md')
     end
-  # ^\s+ must be tt!!
   a = a.gsub(/\n/, "<br/>\n")
+  a = a.gsub(/^\s+/) {|m| '<font color=white>' + '_'*m.size + '</font>' }
   io.puts a
 }
 t.close
