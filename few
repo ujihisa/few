@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 require 'pathname'
 require 'tempfile'
+require 'cgi'
 
 def open_browser(path)
   case RUBY_PLATFORM
@@ -16,21 +17,15 @@ end
 t = Tempfile.new('few')
 
 File.open(t.path, 'w') do |io|
-  a =
-    if true
-      ARGF.read
-    else
-      # debug is love!!!
-      File.read('README.md')
-    end
+  a = ARGF.read
   a = a.gsub(/\r?\n/, "<br />\n")
   # TODO: use CSS; text-indent: xx em;
-  a = a.gsub(/^\s+/) {|m| "&nbsp;"*m.size }
+  a = a.gsub(/^\s+/) {|m| '<font color=white>' + "_"*m.size  + '</font>' }
   io.puts <<-EOF
   <html>
     <head></head>
     <body>
-  #{a.gsub(/^/,"  ")}
+    #{a}
     </body>
   </html>
   EOF
