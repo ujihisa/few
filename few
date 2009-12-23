@@ -21,6 +21,8 @@ def few
     a = ARGF.read
     a = a.gsub(/\r?\n/, "<br />\n")
     # TODO: use CSS; text-indent: xx em;
+    # NOTE: Currently "&nbsp;" doesn't work on ujihisa's environment.
+    #   This may be because of the font you use.
     a = a.gsub(/^\s+/) {|m| '<font color=white>' + "_"*m.size  + '</font>' }
     io.puts <<-EOF
     <html>
