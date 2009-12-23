@@ -23,7 +23,7 @@ File.open(t.path, 'w') do |io|
   a = a.gsub(/^\s+/) {|m| '<font color=white>' + "_"*m.size  + '</font>' }
   io.puts <<-EOF
   <html>
-    <head></head>
+    <head><title>#{ARGF.filename}</title></head>
     <body>
     #{a}
     </body>
