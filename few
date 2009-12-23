@@ -23,11 +23,17 @@ File.open(t.path, 'w') do |io|
       # debug is love!!!
       File.read('README.md')
     end
-  a = a.gsub(/\r?\n/, "<br/>\n")
+  a = a.gsub(/\r?\n/, "<br />\n")
   # TODO: use CSS; text-indent: xx em;
-  a = a.gsub(/^\s+/) {|m| '<font color=white>' + '_'*m.size + '</font>' }
-
-  io.puts a
+  a = a.gsub(/^\s/,"&nbsp;")
+  io.puts <<-EOF
+<html>
+  <head></head>
+  <body>
+#{a.gsub(/^/,"  ")}
+  </body>
+</html>
+  EOF
 end
 
 t.close
