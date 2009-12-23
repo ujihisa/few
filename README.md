@@ -6,6 +6,8 @@ When you're trying to build an application on your terminal, how would you see t
 
     $ few README
 
+    $ cat README | few
+
 ## LICENCE
 
 Ruby's Licence (GPL + MIT)
