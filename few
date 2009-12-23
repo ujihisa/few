@@ -23,7 +23,7 @@ File.open(t.path, 'w') {|io|
       File.read('README.md')
     end
   # ^\s+ must be tt!!
-  a = a.gsub(/\n/, "<br/>\n")
+  a = a.gsub(/\r?\n/, "<br/>\n")
   io.puts a
 }
 t.close
