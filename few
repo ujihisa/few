@@ -41,7 +41,14 @@ end
 
 case $0
 when __FILE__
-  few
+  case ARGV[0]
+  when '-h', '--help'
+    puts "[USAGE]: few {filename}"
+  when '-v', '--version'
+    puts "0.0.1"
+  else
+    few
+  end
 when /spec[^\/]*$/
   describe 'few' do
     it 'is awesome' do
