@@ -1,0 +1,27 @@
+#!ruby
+require 'pathname'
+require 'tempfile'
+
+def open_browser(path)
+  case RUBY_PLATFORM
+  when /darwin/
+    system 'open', path
+  else
+    system 'firefox', path
+  end
+end
+
+t = Tempfile.new('few')
+File.open(t.path, 'w') {|io|
+  a =
+    if false
+      ARGF.read
+    else
+      File.read('README.md')
+    end
+  a = a.gsub(/\n/, "<br/>\n")
+  io.puts a
+}
+t.close
+File.rename(t.path, html = t.path + '.html')
+open_browser(html)
