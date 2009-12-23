@@ -14,7 +14,8 @@ def open_browser(path)
 end
 
 t = Tempfile.new('few')
-File.open(t.path, 'w') {|io|
+
+File.open(t.path, 'w') do |io|
   a =
     if true
       ARGF.read
@@ -23,9 +24,16 @@ File.open(t.path, 'w') {|io|
       File.read('README.md')
     end
   a = a.gsub(/\r?\n/, "<br/>\n")
+  # TODO: use CSS; text-indent: xx em;
   a = a.gsub(/^\s+/) {|m| '<font color=white>' + '_'*m.size + '</font>' }
+
   io.puts a
-}
+end
+
 t.close
+
 File.rename(t.path, html = t.path + '.html')
+
 open_browser(html)
+
+# vim: set filetype=ruby :
