@@ -25,7 +25,7 @@ File.open(t.path, 'w') do |io|
     end
   a = a.gsub(/\r?\n/, "<br />\n")
   # TODO: use CSS; text-indent: xx em;
-  a = a.gsub(/^\s/,"&nbsp;")
+  a = a.gsub(/^\s+/) { |m| "&nbsp;"*m.size }
   io.puts <<-EOF
 <html>
   <head></head>
