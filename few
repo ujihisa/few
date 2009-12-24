@@ -20,13 +20,20 @@ def few
   File.open(t.path, 'w') do |io|
     a = ARGF.read
     a = a.gsub(/\r?\n/, "<br />\n")
-    # TODO: use CSS; text-indent: xx em;
+
     # NOTE: Currently "&nbsp;" doesn't work on ujihisa's environment.
     #   This may be because of the font you use.
-    a = a.gsub(/^\s+/) {|m| '<font color=white>' + "_"*m.size  + '</font>' }
+
+    a = a.gsub(/^(\s+)(.+)<br \/>$/) {|m| '<p style="text-indent: ' + $1.size.to_s + 'em;">' + $2 + '</p>' }
+
     io.puts <<-EOF
     <html>
-      <head><title>#{ARGF.filename}</title></head>
+      <head>
+        <title>#{ARGF.filename}</title>
+        <style type="text/css">
+            p { margin: 0; }
+        </style>
+      </head>
       <body>
       #{a}
       </body>
