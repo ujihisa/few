@@ -1,0 +1,11 @@
+# issues of few
+
+## to-do
+
+- use CSS for indent (text-indent property)
+
+## note
+
+- Currently "&nbsp;" doesn't work on ujihisa's environment.
+
+  This may be because of the font you use.
