@@ -2,7 +2,10 @@
 
 ## to-do
 
-- use CSS for indent (text-indent property)
+- ssh over few
+- vim syntax highlight
+- markdown
+- color
 
 ## note
 
