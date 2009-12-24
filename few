@@ -24,6 +24,7 @@ def few
     # NOTE: Currently "&nbsp;" doesn't work on ujihisa's environment.
     #   This may be because of the font you use.
 
+    a = CGI.escapeHTML(a)
     a = a.gsub(/^(\s+)(.+)<br \/>$/) { '<p style="text-indent: ' + ($1.size/2.0).to_s + 'em;">' + $2 + '</p>' }
 
     io.puts <<-EOF
