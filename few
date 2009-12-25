@@ -58,7 +58,6 @@ def few
     <title>#{ARGF.filename}</title>
     <style type="text/css">
         p { margin: 0; }
-        font-size: 1cm;
     </style>
   </head>
   <body>
