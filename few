@@ -25,6 +25,7 @@ def few
     #   This may be because of the font you use.
 
     a = a.gsub(/^(\s+)(.+)<br \/>$/) { '<p style="text-indent: ' + ($1.size/2.0).to_s + 'em;">' + $2 + '</p>' }
+    a = a.gsub(/\s\s*?\s/) { |m| '&nbsp;'*(m.size*1.5).to_i }
     a = a.gsub(/\x1b\[([0-9]*)m/) do
       case $1
       when "","39"
