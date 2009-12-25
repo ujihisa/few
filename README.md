@@ -34,4 +34,5 @@ Ruby's Licence (GPL + MIT)
 
 ## AUTHOR
 
-Tatsuhiro Ujihisa <http://ujihisa.blogspot.com/>
+* Tatsuhiro Ujihisa <http://ujihisa.blogspot.com/>
+* Sora Harakami <http://codnote.net/>
