@@ -5,7 +5,6 @@
 - ssh over few
 - vim syntax highlight
 - markdown
-- color
 
 ## note
 

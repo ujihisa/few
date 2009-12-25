@@ -25,19 +25,41 @@ def few
     #   This may be because of the font you use.
 
     a = a.gsub(/^(\s+)(.+)<br \/>$/) { '<p style="text-indent: ' + ($1.size/2.0).to_s + 'em;">' + $2 + '</p>' }
+    a = a.gsub(/\x1b\[([0-9]*)m/) do
+      case $1
+      when "","39"
+        '</font>'
+      when "30"
+        '<font color="black">'
+      when "31"
+        '<font color="red">'
+      when "32"
+        '<font color="green">'
+      when "33"
+        '<font color="yellow">'
+      when "34"
+        '<font color="blue">'
+      when "35"
+        '<font color="magenta">'
+      when "36"
+        '<font color="cyan">'
+      when "37"
+        '<font color="white">'
+      end
+    end
 
     io.puts <<-EOF
-    <html>
-      <head>
-        <title>#{ARGF.filename}</title>
-        <style type="text/css">
-            p { margin: 0; }
-        </style>
-      </head>
-      <body>
-      #{a}
-      </body>
-    </html>
+<html>
+  <head>
+    <title>#{ARGF.filename}</title>
+    <style type="text/css">
+        p { margin: 0; }
+    </style>
+  </head>
+  <body>
+    #{a}
+  </body>
+</html>
     EOF
   end
 
@@ -66,13 +88,13 @@ when __FILE__
   end
 when /spec[^\/]*$/
   describe 'few' do
-    it 'is awesome' do
-      def open_browser(path); path; end
-      def ARGF.read; 'a'; end
-      def ARGF.filename; 'b'; end
-      few.should be_an_instance_of(String)
-    end
+  it 'is awesome' do
+    def open_browser(path); path; end
+    def ARGF.read; 'a'; end
+    def ARGF.filename; 'b'; end
+    few.should be_an_instance_of(String)
+  end
   end
 end
 
-# vim: set filetype=ruby :
+# vim: set filetype=ruby : set tabstop=2 : set shiftwidth=2

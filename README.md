@@ -27,7 +27,6 @@ Future plan
 * markdown
 * vim syntax highlight
 * ssh over few
-* color
 
 ## LICENCE
 
