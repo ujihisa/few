@@ -14,6 +14,17 @@ def open_browser(path)
   end
 end
 
+def require_monad(*libraries)
+  libraries.all? {|l|
+    begin
+      require l.to_s
+    rescue LoadError
+    end
+  }
+end
+
+require_monad :rubygems, :markdown
+
 def few
   t = Tempfile.new('few')
 
