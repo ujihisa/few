@@ -45,6 +45,8 @@ def few
         '<font color="cyan">'
       when "37"
         '<font color="white">'
+      else
+        ''
       end
     end
 
