@@ -26,6 +26,7 @@ def few
 
     a = a.gsub(/^(\s+)(.+)<br \/>$/) { '<p style="text-indent: ' + ($1.size/2.0).to_s + 'em;">' + $2 + '</p>' }
     a = a.gsub(/\s{2,}/) {|m| '&nbsp;'*(m.size*1.5).to_i }
+    a = a.gsub(/.\x08/, '')
     a = a.gsub(/\x1b\[([0-9]*)m/) do
       case $1
       when "","39"
@@ -57,6 +58,7 @@ def few
     <title>#{ARGF.filename}</title>
     <style type="text/css">
         p { margin: 0; }
+        font-size: 1cm;
     </style>
   </head>
   <body>
