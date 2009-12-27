@@ -2,6 +2,7 @@
 require 'pathname'
 require 'tempfile'
 require 'cgi'
+require 'kconv'
 
 def open_browser(path)
   case RUBY_PLATFORM
@@ -29,7 +30,7 @@ def few
   t = Tempfile.new('few')
 
   File.open(t.path, 'w') do |io|
-    a = CGI.escapeHTML ARGF.read
+    a = CGI.escapeHTML ARGF.read.toutf8
     a = a.gsub(/\r?\n/, "<br />\n")
 
     # NOTE: Currently "&nbsp;" doesn't work on ujihisa's environment.
