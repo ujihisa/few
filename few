@@ -26,7 +26,9 @@ end
 
 require_monad :rubygems, :markdown
 
-def few
+def few(h={})
+  conf = {:filetype => 'text'}.merge(h)
+
   t = Tempfile.new('few')
 
   File.open(t.path, 'w') do |io|
@@ -99,6 +101,9 @@ when __FILE__
     raise unless /^#!/ =~ code
     File.open(__FILE__, 'w') {|io| io.print code }
     system __FILE__, '-v'
+  when /--filetype=([a-zA-Z0-9]+)/
+    ARGV.shift
+    few(:filetype => $1)
   else
     few
   end
