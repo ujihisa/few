@@ -66,7 +66,7 @@ def few
     io.puts <<-EOF
 <html>
   <head>
-    <title>#{ARGF.filename}</title>
+    <title>[FEW] #{ARGF.filename}</title>
     <style type="text/css">
         p { margin: 0; }
     </style>
