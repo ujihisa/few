@@ -2,6 +2,7 @@
 require 'pathname'
 require 'tempfile'
 require 'cgi'
+require 'kconv'
 
 def open_browser(path)
   case RUBY_PLATFORM
@@ -25,11 +26,13 @@ end
 
 require_monad :rubygems, :markdown
 
-def few
+def few(h={})
+  conf = {:filetype => 'text'}.merge(h)
+
   t = Tempfile.new('few')
 
   File.open(t.path, 'w') do |io|
-    a = CGI.escapeHTML ARGF.read
+    a = CGI.escapeHTML ARGF.read.toutf8
     a = a.gsub(/\r?\n/, "<br />\n")
 
     # NOTE: Currently "&nbsp;" doesn't work on ujihisa's environment.
@@ -98,6 +101,9 @@ when __FILE__
     raise unless /^#!/ =~ code
     File.open(__FILE__, 'w') {|io| io.print code }
     system __FILE__, '-v'
+  when /--filetype=([a-zA-Z0-9]+)/
+    ARGV.shift
+    few(:filetype => $1)
   else
     few
   end
