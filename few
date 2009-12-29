@@ -69,7 +69,7 @@ def few(h={})
     io.puts <<-EOF
 <html>
   <head>
-    <title>[FEW] #{ARGF.filename}</title>
+    <title>few: #{ARGF.filename}</title>
     <style type="text/css">
         p { margin: 0; }
     </style>
