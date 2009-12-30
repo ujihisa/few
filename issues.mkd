@@ -6,9 +6,3 @@
 - vim syntax highlight
 - markdown
 - filetype
-
-## note
-
-- Currently "&nbsp;" doesn't work on ujihisa's environment.
-
-  This may be because of the font you use.

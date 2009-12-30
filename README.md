@@ -32,7 +32,13 @@ Future plan
 
 Ruby's Licence (GPL + MIT)
 
+## TWITTER BOT
+
+[@fewc](http://twitter.com/fewc)
+
 ## AUTHOR
 
 * Tatsuhiro Ujihisa <http://ujihisa.blogspot.com/>
 * Sora Harakami <http://codnote.net/>
+
+ vim: filetype=markdown
