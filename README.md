@@ -40,9 +40,10 @@ Ruby's Licence (GPL + MIT)
 
 [@fewc](http://twitter.com/fewc)
 
-## AUTHOR
+## AUTHORS
 
 * Tatsuhiro Ujihisa <http://ujihisa.blogspot.com/>
 * Sora Harakami <http://codnote.net/>
+* Haruo Nanki <http://blog.netswitch.jp/>
 
  vim: filetype=markdown
