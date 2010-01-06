@@ -17,8 +17,13 @@ end
 
 def require_monad(*libraries)
   libraries.all? {|l|
+    l = l.to_s
     begin
-      require l.to_s
+      if File.basename(l).include? '.'
+        load l
+      else
+        require l
+      end
     rescue LoadError
     end
   }
