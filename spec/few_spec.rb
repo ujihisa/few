@@ -1,4 +1,4 @@
-describe 'few command' do
+describe '`few` command' do
   before do
     @few = File.dirname(__FILE__) + '/../bin/few'
   end
@@ -15,12 +15,12 @@ describe 'few command' do
     pending
   end
 
-  it 'opens your browswer the HTML flavored data given by pipe' do
+  it 'opens the HTML flavored data given by pipe on your browswer' do
     # $ cat FILE | few
     pending
   end
 
-  it 'opens your browswer the HTML flavored data given by parameter' do
+  it 'opens the HTML flavored data given by parameter on your browswer' do
     # $ few FILE
     pending
   end
