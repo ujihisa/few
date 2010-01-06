@@ -1,3 +1,5 @@
+require 'tempfile'
+
 describe '`few` command' do
   before do
     @few = File.dirname(__FILE__) + '/../bin/few'
@@ -16,8 +18,16 @@ describe '`few` command' do
   end
 
   it 'opens the HTML flavored data given by pipe on your browswer' do
-    # $ cat FILE | few
-    pending
+    # In other words: $ cat FILE | few
+    t = Tempfile.new('few').path + '.rb'
+    File.open(t, 'w') {|io|
+      io.puts 'def system(*o); p o; end'
+      io.puts 'load "bin/few"'
+    }
+    cmd, arg = *eval(`echo 123 | ruby #{t}`)
+    cmd.should == 'open'
+    arg.should match(/\.html$/)
+    File.read(arg).should match('123')
   end
 
   it 'opens the HTML flavored data given by parameter on your browswer' do
