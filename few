@@ -26,9 +26,7 @@ end
 
 require_monad :rubygems, :markdown
 
-def few(h={})
-  conf = {:filetype => 'text'}.merge(h)
-
+def few(filetype = 'text')
   t = Tempfile.new('few')
 
   File.open(t.path, 'w') do |io|
@@ -69,7 +67,7 @@ def few(h={})
     io.puts <<-EOF
 <html>
   <head>
-    <title>few: #{ARGF.filename}</title>
+    <title>few: #{ARGF.filename} (#{filetype})</title>
     <style type="text/css">
         p { margin: 0; }
     </style>
@@ -93,6 +91,7 @@ when __FILE__
   case ARGV[0]
   when '-h', '--help'
     puts "[USAGE]: few {filename}"
+    puts "         cat {filename} | few"
   when '-v', '--version'
     puts "0.0.1"
   when '--selfupdate'
@@ -103,7 +102,7 @@ when __FILE__
     system __FILE__, '-v'
   when /--filetype=([a-zA-Z0-9]+)/
     ARGV.shift
-    few(:filetype => $1)
+    few $1
   else
     few
   end
