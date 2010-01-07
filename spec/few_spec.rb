@@ -25,14 +25,46 @@ describe '`few` command' do
       io.puts 'load "bin/few"'
     }
     cmd, arg = *eval(`echo 123 | ruby #{t}`)
-    cmd.should == 'open'
+    cmd.should == case RUBY_PLATFORM
+                  when /darwin/
+                    'open'
+                  when /mswin(?!ce)|mingw|cygwin|bccwin/
+                    'start'
+                  else
+                    'firefox'
+                  end
     arg.should match(/\.html$/)
     File.read(arg).should match('123')
   end
 
   it 'opens the HTML flavored data given by parameter on your browswer' do
     # $ few FILE
-    pending
+    t = Tempfile.new('few').path + '.rb'
+    u = Tempfile.new('few2').path + '.txt'
+    File.open(t, 'w') {|io|
+      io.puts 'def system(*o); p o; end'
+      io.puts 'load "bin/few"'
+    }
+    File.open(u, 'w') {|io|
+      io.puts 'hi'
+      io.puts '  vi'
+      io.puts 'yay  yay'
+    }
+    cmd, arg = *eval(`ruby #{t} #{u}`)
+    cmd.should == case RUBY_PLATFORM
+                  when /darwin/
+                    'open'
+                  when /mswin(?!ce)|mingw|cygwin|bccwin/
+                    'start'
+                  else
+                    'firefox'
+                  end
+    arg.should match(/\.html$/)
+
+    l = open(arg,'r').readlines
+    l[8].chomp.should match('    hi')
+    l[9].chomp.should match('<p style="text-indent: 1.0em;">vi</p>')
+    l[10].chomp.should match('yay&nbsp;&nbsp;&nbsp;yay')
   end
 
   it 'also accepts --filetype= option' do
