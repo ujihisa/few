@@ -14,7 +14,17 @@ describe '`few` command' do
   end
 
   it 'updates itself with --selfupdate option' do
-    pending
+    # In other words: $ few --selfupdate
+    t = Tempfile.new('few').path + '.rb'
+    File.open(t, 'w') {|io|
+      io.puts 'def open(*o, &b); p o; "#!\np 1"; end'
+      io.puts 'def require(*o);end'
+      io.puts 'def File.open(*o); end'
+      io.puts 'def system(*o); end'
+      io.puts 'load "bin/few"'
+    }
+    `ruby #{t} --selfupdate`.strip.should ==
+      '["http://github.com/ujihisa/few/raw/master/bin/few"]'
   end
 
   it 'opens the HTML flavored data given by pipe on your browswer' do
