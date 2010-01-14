@@ -26,8 +26,13 @@ end
 
 def require_monad(*libraries)
   libraries.all? {|l|
+    l = l.to_s
     begin
-      require l.to_s
+      if File.basename(l).include? '.'
+        load l
+      else
+        require l
+      end
     rescue LoadError
     end
   }
@@ -35,9 +40,7 @@ end
 
 require_monad :rubygems, :markdown
 
-def few(h={})
-  conf = {:filetype => 'text'}.merge(h)
-
+def few(filetype = 'text')
   t = Tempfile.new('few')
 
   File.open(t.path, 'w') do |io|
@@ -78,7 +81,7 @@ def few(h={})
     io.puts <<-EOF
 <html>
   <head>
-    <title>few: #{ARGF.filename}</title>
+    <title>few: #{ARGF.filename} (#{filetype})</title>
     <style type="text/css">
         p { margin: 0; }
     </style>
@@ -97,34 +100,23 @@ def few(h={})
   open_browser(html)
 end
 
-case $0
-when __FILE__
-  case ARGV[0]
-  when '-h', '--help'
-    puts "[USAGE]: few {filename}"
-  when '-v', '--version'
-    puts "0.0.1"
-  when '--selfupdate'
-    require 'open-uri'
-    code = open('http://github.com/ujihisa/few/raw/master/few') {|io| io.read }
-    raise unless /^#!/ =~ code
-    File.open(__FILE__, 'w') {|io| io.print code }
-    system __FILE__, '-v'
-  when /--filetype=([a-zA-Z0-9]+)/
-    ARGV.shift
-    few(:filetype => $1)
-  else
-    few
-  end
-when /spec[^\/]*$/
-  describe 'few' do
-  it 'is awesome' do
-    def open_browser(path); path; end
-    def ARGF.read; 'a'; end
-    def ARGF.filename; 'b'; end
-    few.should be_an_instance_of(String)
-  end
-  end
+case ARGV[0]
+when '-h', '--help'
+  puts "[USAGE]: few {filename}"
+  puts "         cat {filename} | few"
+when '-v', '--version'
+  puts "0.0.1"
+when '--selfupdate'
+  require 'open-uri'
+  code = open('http://github.com/ujihisa/few/raw/master/bin/few') {|io| io.read }
+  raise unless /^#!/ =~ code
+  File.open(__FILE__, 'w') {|io| io.print code }
+  system __FILE__, '-v'
+when /--filetype=([a-zA-Z0-9]+)/
+  ARGV.shift
+  few $1
+else
+  few
 end
 
 # vim: set filetype=ruby : set tabstop=2 : set shiftwidth=2
