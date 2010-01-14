@@ -54,28 +54,28 @@ def few(filetype = 'text')
     a = a.gsub(/\s{2,}/) {|m| '&nbsp;'*(m.size*1.5).to_i }
     a = a.gsub(/.\x08/, '')
     a = a.gsub(/\x1b\[([0-9]*)m/) do
-    case $1
-    when "","39"
-      '</font>'
-    when "30"
-      '<font color="black">'
-    when "31"
-      '<font color="red">'
-    when "32"
-      '<font color="green">'
-    when "33"
-      '<font color="yellow">'
-    when "34"
-      '<font color="blue">'
-    when "35"
-      '<font color="magenta">'
-    when "36"
-      '<font color="cyan">'
-    when "37"
-      '<font color="white">'
-    else
-      ''
-    end
+      case $1
+      when "","39"
+        '</font>'
+      when "30"
+        '<font color="black">'
+      when "31"
+        '<font color="red">'
+      when "32"
+        '<font color="green">'
+      when "33"
+        '<font color="yellow">'
+      when "34"
+        '<font color="blue">'
+      when "35"
+        '<font color="magenta">'
+      when "36"
+        '<font color="cyan">'
+      when "37"
+        '<font color="white">'
+      else
+        ''
+      end
     end
 
     io.puts <<-EOF
