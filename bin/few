@@ -50,8 +50,8 @@ def few(filetype = 'text')
     # NOTE: Currently "&nbsp;" doesn't work on ujihisa's environment.
     #   This may be because of the font you use.
 
-    a = a.gsub(/^(\s+)(.+)<br \/>$/) { '<p style="text-indent: ' + ($1.size/2.0).to_s + 'em;">' + $2 + '</p>' }
-    a = a.gsub(/\s{2,}/) {|m| '&nbsp;'*(m.size*1.5).to_i }
+    #a = a.gsub(/^(\s+)(.+)<br \/>$/) { '<p style="text-indent: ' + ($1.size/2.0).to_s + 'em;">' + $2 + '</p>' }
+    #a = a.gsub(/\s{2,}/) {|m| '&nbsp;'*(m.size*1.5).to_i }
     a = a.gsub(/.\x08/, '')
     a = a.gsub(/\x1b\[([0-9]*)m/) do
       case $1
@@ -83,11 +83,11 @@ def few(filetype = 'text')
   <head>
     <title>few: #{ARGF.filename} (#{filetype})</title>
     <style type="text/css">
-        p { margin: 0; }
+        body { white-space: pre; line-height: 5px;}
     </style>
   </head>
   <body>
-    #{a}
+#{a}
   </body>
 </html>
     EOF
