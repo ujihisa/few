@@ -25,6 +25,7 @@ The principles of `few`
 * Does not require any non-standard libraries
 * Works every Ruby from 1.8.6 to 1.9.2
     * Which means you have to avoid Enumerators and to care about Encodings
+* (`spec/few` is OK of working only in 1.8.7+)
 
 Future plan
 

@@ -5,13 +5,22 @@ require 'cgi'
 require 'kconv'
 
 def open_browser(path)
-  case RUBY_PLATFORM
-  when /darwin/
-    system 'open', path
-  when /mswin(?!ce)|mingw|cygwin|bccwin/
-    system 'start', path
+  if ENV['KDE_FULL_SESSION'] == 'true'
+    system 'kfmclient', 'exec', path
+  elsif ENV['GNOME_DESKTOP_SESSION_ID']
+    system 'gnome-open', path
+  elsif lambda { begin; `exo-open`; true; rescue; false; end }.call
+    # FIXME: is fungible system('exo-open').nil? for lambda {...}
+    system 'exo-open', path
   else
-    system 'firefox', path
+    case RUBY_PLATFORM
+    when /darwin/
+      system 'open', path
+    when /mswin(?!ce)|mingw|cygwin|bccwin/
+      system 'start', path
+    else
+      system 'firefox', path
+    end
   end
 end
 
@@ -99,7 +108,7 @@ when '-v', '--version'
   puts "0.0.1"
 when '--selfupdate'
   require 'open-uri'
-  code = open('http://github.com/ujihisa/few/raw/master/few') {|io| io.read }
+  code = open('http://github.com/ujihisa/few/raw/master/bin/few') {|io| io.read }
   raise unless /^#!/ =~ code
   File.open(__FILE__, 'w') {|io| io.print code }
   system __FILE__, '-v'
