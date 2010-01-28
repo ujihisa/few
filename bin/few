@@ -4,22 +4,23 @@ require 'tempfile'
 require 'cgi'
 require 'kconv'
 
-def open_browser(path)
+def open_browser(url)
   if ENV['KDE_FULL_SESSION'] == 'true'
-    system 'kfmclient', 'exec', path
+    system 'kfmclient', 'exec', url
   elsif ENV['GNOME_DESKTOP_SESSION_ID']
-    system 'gnome-open', path
-  elsif lambda { begin; `exo-open`; true; rescue; false; end }.call
-    # FIXME: is fungible system('exo-open').nil? for lambda {...}
-    system 'exo-open', path
+    system 'gnome-open', url
+  elsif system("exo-open -v >& /dev/null")
+    system 'exo-open', url
   else
-    case RUBY_PLATFORM
+    case RUBY_PLATFORM.downcase
+    when /linux/
+      system 'firefox', url
     when /darwin/
-      system 'open', path
-    when /mswin(?!ce)|mingw|cygwin|bccwin/
-      system 'start', path
+      system 'open', url
+    when /mswin(?!ce)|mingw|bccwin/
+      system 'start', url
     else
-      system 'firefox', path
+      system 'firefox', url
     end
   end
 end
