@@ -5,23 +5,23 @@ require 'cgi'
 require 'kconv'
 
 def open_browser(url)
-  if ENV['KDE_FULL_SESSION'] == 'true'
-    system 'kfmclient', 'exec', url
-  elsif ENV['GNOME_DESKTOP_SESSION_ID']
-    system 'gnome-open', url
-  elsif system("exo-open -v >& /dev/null")
-    system 'exo-open', url
-  else
-    case RUBY_PLATFORM.downcase
-    when /linux/
-      system 'firefox', url
-    when /darwin/
-      system 'open', url
-    when /mswin(?!ce)|mingw|bccwin/
-      system 'start', url
+  case RUBY_PLATFORM.downcase
+  when /linux/
+    if ENV['KDE_FULL_SESSION'] == 'true'
+      system 'kfmclient', 'exec', url
+    elsif ENV['GNOME_DESKTOP_SESSION_ID']
+      system 'gnome-open', url
+    elsif system("exo-open -v >& /dev/null")
+      system 'exo-open', url
     else
       system 'firefox', url
     end
+  when /darwin/
+    system 'open', url
+  when /mswin(?!ce)|mingw|bccwin/
+    system 'start', url
+  else
+    system 'firefox', url
   end
 end
 
@@ -48,11 +48,6 @@ def few(filetype = 'text')
     a = CGI.escapeHTML ARGF.read.toutf8
     a = a.gsub(/\r?\n/, "<br />\n")
 
-    # NOTE: Currently "&nbsp;" doesn't work on ujihisa's environment.
-    #   This may be because of the font you use.
-
-    #a = a.gsub(/^(\s+)(.+)<br \/>$/) { '<p style="text-indent: ' + ($1.size/2.0).to_s + 'em;">' + $2 + '</p>' }
-    #a = a.gsub(/\s{2,}/) {|m| '&nbsp;'*(m.size*1.5).to_i }
     a = a.gsub(/.\x08/, '')
     a = a.gsub(/\x1b\[([0-9]*)m/) do
       case $1
