@@ -79,7 +79,11 @@ def few(filetype = 'text')
   <head>
     <title>few: #{ARGF.filename} (#{filetype})</title>
     <style type="text/css">
-        body { white-space: pre; line-height: 5px;}
+        body {
+          white-space: pre;
+          line-height: 7px;
+          font-family: sans-serif;
+        }
     </style>
   </head>
   <body>
