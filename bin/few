@@ -82,7 +82,8 @@ def few(filetype = 'text')
         body {
           white-space: pre;
           line-height: 7px;
-          font-family: sans-serif;
+          font-size: 12pt;
+          font-family: "menlo regular", "monaco", "courier", monospace;
         }
     </style>
   </head>
