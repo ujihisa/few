@@ -118,7 +118,7 @@ when '-h', '--help'
   puts "            cat {filename} | few"
   puts "            make |& few --tee"
 when '-v', '--version'
-  puts "0.0.1"
+  puts "0.0.2"
 when '--selfupdate'
   require 'open-uri'
   code = open('http://github.com/ujihisa/few/raw/master/bin/few') {|io| io.read }
