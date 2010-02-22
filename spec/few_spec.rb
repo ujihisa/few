@@ -60,7 +60,7 @@ describe '`few` command' do
       io.puts '  vi'
       io.puts 'yay  yay'
     }
-    cmd, arg = *eval(`ruby #{t} #{u}`)
+    cmd, arg, arg2 = *eval(`ruby #{t} #{u}`)
     cmd.should == case RUBY_PLATFORM.downcase
                   when /linux/
                     if ENV['KDE_FULL_SESSION'] == 'true'
@@ -79,7 +79,7 @@ describe '`few` command' do
                   else
                     'firefox'
                   end
-    arg.should match(/\.html$/)
+    (cmd == 'kfmclient' && arg == 'exec' ? arg2 : arg).should match(/\.html$/)
 
     l = open(arg,'r').readlines
     l[13].chomp.should match('hi')
@@ -92,6 +92,16 @@ describe '`few` command' do
   end
 
   it 'should --tee option runs like to `tee` command' do
-    pending
+    # $ echo 'hoge' | few --tee FILE
+    t = Tempfile.new('few').path + '.rb'
+    File.open(t, 'w') {|io|
+      io.puts 'print "[\""'
+      io.puts 'def system(*o); print "\",";print o[2] ? o[2].inspect : o[1].inspect; end'
+      io.puts 'load "bin/few"'
+      io.puts 'print "]"'
+    }
+    printed, file = *eval(`echo 'hi'|ruby #{t} --tee`)
+    printed.should match('hi\n')
+    open(file,'r').readlines[13].should match('hi')
   end
 end
