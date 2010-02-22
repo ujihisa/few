@@ -3,6 +3,7 @@ require 'pathname'
 require 'tempfile'
 require 'cgi'
 require 'kconv'
+require 'singleton'
 
 def open_browser(url)
   case RUBY_PLATFORM.downcase
@@ -41,53 +42,75 @@ end
 
 require_monad :rubygems, :markdown
 
-def few(o={})
-  opt = {:filetype => :text, :tee => false}.merge(o)
-  t = Tempfile.new('few')
 
-  File.open(t.path, 'w') do |io|
-    if opt[:tee]
-      b = ''
-      ARGF.each do |l|
-        print l
-        b += l
-      end
-      a = CGI.escapeHTML b
+class FewConfig < Hash
+  include ::Singleton
+  def self.method_missing(n,*a)
+    self.instance.__send__(n,*a)
+  end
+
+  def method_missing(n,*a)
+    case n.to_s
+    when /=$/
+      self[n.to_s.gsub(/=$/,'').to_sym]=a[0]
     else
-      a = CGI.escapeHTML ARGF.read.toutf8
+      self[n]
     end
-    a = a.gsub(/\r?\n/, "<br />\n")
+  end
+end
 
-    a = a.gsub(/.\x08/, '')
-    a = a.gsub(/\x1b\[([0-9]*)m/) do
-      case $1
-      when "","39"
-        '</font>'
-      when "30"
-        '<font color="black">'
-      when "31"
-        '<font color="red">'
-      when "32"
-        '<font color="green">'
-      when "33"
-        '<font color="yellow">'
-      when "34"
-        '<font color="blue">'
-      when "35"
-        '<font color="magenta">'
-      when "36"
-        '<font color="cyan">'
-      when "37"
-        '<font color="white">'
+
+class Few
+  def initialize(o)
+    @opt = {:filetype => :text, :tee => false}.merge(o)
+  end
+
+  def run
+    t = Tempfile.new('few')
+
+    File.open(t.path, 'w') do |io|
+      if @opt[:tee]
+        b = ''
+        ARGF.each do |l|
+          print l
+          b += l
+        end
+        a = CGI.escapeHTML b
       else
-        ''
+        a = CGI.escapeHTML ARGF.read.toutf8
       end
-    end
+      a = a.gsub(/\r?\n/, "<br />\n")
 
-    io.puts <<-EOF
+      a = a.gsub(/.\x08/, '')
+      a = a.gsub(/\x1b\[([0-9]*)m/) do
+        case $1
+        when "","39"
+        '</font>'
+        when "30"
+        '<font color="black">'
+        when "31"
+        '<font color="red">'
+        when "32"
+        '<font color="green">'
+        when "33"
+        '<font color="yellow">'
+        when "34"
+        '<font color="blue">'
+        when "35"
+        '<font color="magenta">'
+        when "36"
+        '<font color="cyan">'
+        when "37"
+        '<font color="white">'
+        else
+        ''
+        end
+      end
+
+      io.puts <<-EOF
 <html>
   <head>
-    <title>few: #{ARGF.filename} (#{opt[:filetype].to_s})</title>
+    <title>few: #{ARGF.filename} (#{@opt[:filetype].to_s})</title>
     <style type="text/css">
         body {
           white-space: pre;
@@ -98,17 +121,23 @@ def few(o={})
     </style>
   </head>
   <body>
-#{a}
+      #{a}
   </body>
 </html>
     EOF
+    end
+
+    t.close
+
+    File.rename(t.path, html = t.path + '.html')
+
+    open_browser(html)
+
   end
+end
 
-  t.close
-
-  File.rename(t.path, html = t.path + '.html')
-
-  open_browser(html)
+def few(o={})
+  Few.new(o).run
 end
 
 case ARGV[0]
@@ -134,5 +163,4 @@ when '--tee', '-t', '-T'
 else
   few
 end
-
 # vim: set filetype=ruby : set tabstop=2 : set shiftwidth=2
