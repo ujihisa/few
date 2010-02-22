@@ -12,4 +12,8 @@ describe Few::Config do
   it 'can read with self.<name>' do
     @config.b.should == 2
   end
+
+  it 'can set default values on initialize' do
+    Few::Config.new(:foo => :bar).foo.should == :bar
+  end
 end

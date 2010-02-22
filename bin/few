@@ -46,7 +46,7 @@ require_monad :rubygems, :markdown
 class Few
   class Config
     def initialize(i={})
-      @c = {}
+      @c = i
     end
     def method_missing(n,*a)
       case n.to_s
@@ -60,15 +60,26 @@ class Few
 
   def initialize(o)
     @opt = {:filetype => :text, :tee => false}.merge(o)
-    @config = Config.new
+    @config = Config.new(:remote => false, :private_key => fewdir('key'), :public_key => fewdir('key.pub'))
   end
 
   def load_config
     config_files = ['_fewrc','.fewrc','.few.conf','few.conf','.fewrc.rb','_fewrc.rb','fewrc.rb']
+    config_files.delete_if{|x| !File.exist?(File.expand_path("~") + '/' + x)}
+    if config_files.length > 0
+      config_file = config_files[0]
+      eval File.load(config_file)
+    end
   end
 
   def fewdir(path)
     dirs = ['few','fewfiles']
+    dirs.delete_if{|x| !File.exist?(File.expand_path("~") + '/' + x)}
+    if dirs.length > 0
+      dir = config_files[0]
+      dir+'/'+path
+    else; nil
+    end
   end
 
   def run
@@ -140,6 +151,7 @@ class Few
     open_browser(html)
 
   end
+  attr_reader :config
 end
 
 def few(o={})
