@@ -21,6 +21,7 @@ describe '`few` command' do
       io.puts 'def require(*o);end'
       io.puts 'def File.open(*o); end'
       io.puts 'def system(*o); end'
+      io.puts '$few_speccing = true'
       io.puts 'load "bin/few"'
     }
     `ruby #{t} --selfupdate`.strip.should ==
@@ -32,6 +33,7 @@ describe '`few` command' do
     t = Tempfile.new('few').path + '.rb'
     File.open(t, 'w') {|io|
       io.puts 'def system(*o); p o; end'
+      io.puts '$few_speccing = true'
       io.puts 'load "bin/few"'
     }
     cmd, arg = *eval(`echo 123 | ruby #{t}`)
@@ -53,6 +55,7 @@ describe '`few` command' do
     u = Tempfile.new('few2').path + '.txt'
     File.open(t, 'w') {|io|
       io.puts 'def system(*o); p o; end'
+      io.puts '$few_speccing = true'
       io.puts 'load "bin/few"'
     }
     File.open(u, 'w') {|io|
@@ -97,6 +100,7 @@ describe '`few` command' do
     File.open(t, 'w') {|io|
       io.puts 'print "[\""'
       io.puts 'def system(*o); print "\",";print o[2] ? o[2].inspect : o[1].inspect; end'
+      io.puts '$few_speccing = true'
       io.puts 'load "bin/few"'
       io.puts 'print "]"'
     }
