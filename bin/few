@@ -41,11 +41,21 @@ end
 
 require_monad :rubygems, :markdown
 
-def few(filetype = 'text')
+def few(o={})
+  opt = {:filetype => :text, :tee => false}.merge(o)
   t = Tempfile.new('few')
 
   File.open(t.path, 'w') do |io|
-    a = CGI.escapeHTML ARGF.read.toutf8
+    if opt[:tee]
+      b = ''
+      ARGF.each do |l|
+        print l
+        b += l
+      end
+      a = CGI.escapeHTML b
+    else
+      a = CGI.escapeHTML ARGF.read.toutf8
+    end
     a = a.gsub(/\r?\n/, "<br />\n")
 
     a = a.gsub(/.\x08/, '')
@@ -77,7 +87,7 @@ def few(filetype = 'text')
     io.puts <<-EOF
 <html>
   <head>
-    <title>few: #{ARGF.filename} (#{filetype})</title>
+    <title>few: #{ARGF.filename} (#{opt[:filetype].to_s})</title>
     <style type="text/css">
         body {
           white-space: pre;
@@ -115,7 +125,10 @@ when '--selfupdate'
   system __FILE__, '-v'
 when /--filetype=([a-zA-Z0-9]+)/
   ARGV.shift
-  few $1
+  few(:filetype => $1.to_sym)
+when '--tee', '-t', '-T'
+  ARGV.shift
+  few(:tee => true, :filetype => :tee)
 else
   few
 end
