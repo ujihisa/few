@@ -43,26 +43,33 @@ end
 require_monad :rubygems, :markdown
 
 
-class FewConfig < Hash
-  include ::Singleton
-  def self.method_missing(n,*a)
-    self.instance.__send__(n,*a)
-  end
+class Few
+  class Config < Hash
+    def self.method_missing(n,*a)
+      self.instance.__send__(n,*a)
+    end
 
-  def method_missing(n,*a)
-    case n.to_s
-    when /=$/
-      self[n.to_s.gsub(/=$/,'').to_sym]=a[0]
-    else
-      self[n]
+    def method_missing(n,*a)
+      case n.to_s
+      when /=$/
+        self[n.to_s.gsub(/=$/,'').to_sym]=a[0]
+      else
+        self[n]
+      end
     end
   end
-end
 
-
-class Few
   def initialize(o)
     @opt = {:filetype => :text, :tee => false}.merge(o)
+    @config = Config.new
+  end
+
+  def load_config
+    config_files = ['_fewrc','.fewrc','.few.conf','few.conf','.fewrc.rb','_fewrc.rb','fewrc.rb']
+  end
+
+  def fewdir(path)
+    dirs = ['few','fewfiles']
   end
 
   def run
