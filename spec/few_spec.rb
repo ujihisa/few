@@ -91,7 +91,7 @@ describe '`few` command' do
     pending # based on the last specification
   end
 
-  it 'should --tee option runs like to `tee` command' do
+  it 'also --tee option runs like to `tee` command' do
     # $ echo 'hoge' | few --tee FILE
     t = Tempfile.new('few').path + '.rb'
     File.open(t, 'w') {|io|
