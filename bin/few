@@ -44,17 +44,16 @@ require_monad :rubygems, :markdown
 
 
 class Few
-  class Config < Hash
-    def self.method_missing(n,*a)
-      self.instance.__send__(n,*a)
+  class Config
+    def initialize(i={})
+      @c = {}
     end
-
     def method_missing(n,*a)
       case n.to_s
       when /=$/
-        self[n.to_s.gsub(/=$/,'').to_sym]=a[0]
+        @c[n.to_s.gsub(/=$/,'').to_sym]=a[0]
       else
-        self[n]
+        @c[n]
       end
     end
   end
