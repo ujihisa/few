@@ -61,10 +61,20 @@ describe '`few` command' do
       io.puts 'yay  yay'
     }
     cmd, arg = *eval(`ruby #{t} #{u}`)
-    cmd.should == case RUBY_PLATFORM
+    cmd.should == case RUBY_PLATFORM.downcase
+                  when /linux/
+                    if ENV['KDE_FULL_SESSION'] == 'true'
+                      'kfmclient'
+                    elsif ENV['GNOME_DESKTOP_SESSION_ID']
+                      'gnome-open'
+                    elsif system("exo-open -v >& /dev/null")
+                      'exo-open'
+                    else
+                      'firefox'
+                    end
                   when /darwin/
                     'open'
-                  when /mswin(?!ce)|mingw|cygwin|bccwin/
+                  when /mswin(?!ce)|mingw|bccwin/
                     'start'
                   else
                     'firefox'
@@ -72,12 +82,16 @@ describe '`few` command' do
     arg.should match(/\.html$/)
 
     l = open(arg,'r').readlines
-    l[8].chomp.should match('    hi')
-    l[9].chomp.should match('<p style="text-indent: 1.0em;">vi</p>')
-    l[10].chomp.should match('yay&nbsp;&nbsp;&nbsp;yay')
+    l[13].chomp.should match('hi')
+    l[14].chomp.should match('  vi')
+    l[15].chomp.should match('yay  yay')
   end
 
   it 'also accepts --filetype= option' do
     pending # based on the last specification
+  end
+
+  it 'should --tee option runs like to `tee` command' do
+    pending
   end
 end
