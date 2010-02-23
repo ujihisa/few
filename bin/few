@@ -58,27 +58,86 @@ class Few
     end
   end
 
+  class RemoteHelper
+    def initialize(o={})
+      require 'net/http'
+      require 'openssl'
+      require 'uri'
+      require 'cgi'
+      @opt         = {:private_key => nil,:public_key => nil, :remote_path => nil}.merge(o)
+      @priv_key    = @opt[:private_key] ? OpenSSL::PKey::RSA.new(@opt[:private_key]) : nil
+      @publ_key    = @opt[:public_key ] ? OpenSSL::PKey::RSA.new(@opt[:public_key ]) : nil
+      @remote_path = URI.parse(@opt[:remote_path])
+    end
+
+    def generate_key_pair
+      rsa                = OpenSSL::PKey::RSA.generate(2048)
+      @opt[:private_key] = rsa.export
+      @opt[:public_key ] = rsa.public_key.to_s
+      @priv_key          = rsa
+      @publ_key          = OpenSSL::PKey::RSA.new(rsa.public_key)
+    end
+
+    def private_key; @opt[:private_key]; end
+    def public_key ; @opt[:public_key ]; end
+    def remote_path; @opt[:remote_path]; end
+
+    def crypt(str)
+      @publ_key.public_encrypt(str)
+    end
+
+    def decrypt(str)
+      @priv_key.private_decrypt(str)
+    end
+
+    def send(str)
+      return unless @opt[:remote_path]
+      c = crypt(str)
+      Net::HTTP.start(@remote_path.host,@remote_path.port) do |h|
+        r = h.post(@remote_path.path,'public_key='+CGI.escape(@opt[:public_key])+'&body='+CGI.escape(c))
+      end
+    end
+
+    def recv
+      return unless @opt[:remote_path]
+      Net::HTTP.start(@remote_path.host,@remote_path.port) do |h|
+        r = h.get(@remote_path.path+'?public_key='+CGI.escape(@opt[:public_key]))
+        begin; b = r.body.split(/\r?\n/,''); rescue; return nil; end
+        if b.shift.chomp == 'have'
+          return b.join('\n')
+        else
+          return nil
+        end
+      end
+    end
+  end
+
   def initialize(o)
-    @opt = {:filetype => :text, :tee => false}.merge(o)
-    @config = Config.new(:remote => false, :private_key => fewdir('key'), :public_key => fewdir('key.pub'))
+    @opt = {:filetype => :text, :tee => false, :server => false}.merge(o)
+    @config = Config.new(:remote => false, :private_key => fewdir('key'), :public_key => fewdir('key.pub'),:remote_path => nil)
   end
 
   def load_config
+    return if $few_speccing
     config_files = ['_fewrc','.fewrc','.few.conf','few.conf','.fewrc.rb','_fewrc.rb','fewrc.rb']
     config_files.delete_if{|x| !File.exist?(File.expand_path("~") + '/' + x)}
     if config_files.length > 0
       config_file = config_files[0]
       eval File.load(config_file)
     end
+    self
   end
 
   def fewdir(path)
-    dirs = ['few','fewfiles']
-    dirs.delete_if{|x| !File.exist?(File.expand_path("~") + '/' + x)}
-    if dirs.length > 0
-      dir = config_files[0]
-      dir+'/'+path
-    else; nil
+    if $few_speccing
+    else 
+      dirs = ['few','fewfiles']
+      dirs.delete_if{|x| !File.exist?(File.expand_path("~") + '/' + x)}
+      if dirs.length > 0
+        dir = config_files[0]
+        dir+'/'+path
+      else; nil
+      end
     end
   end
 
@@ -178,6 +237,10 @@ when /--filetype=([a-zA-Z0-9]+)/
 when '--tee', '-t', '-T'
   ARGV.shift
   few(:tee => true, :filetype => :tee)
+when '--remote-standing', '-r'
+  puts 'Error: Sorry, this feature is not implemented yet.'
+when '--daemon', '-d'
+  puts 'Error: Sorry, this feature is not implemented yet.'
 else
   few
 end
