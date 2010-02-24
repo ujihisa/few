@@ -249,7 +249,7 @@ end
 
 case ARGV[0]
 when '-h', '--help'
-  puts "[USAGE]: few [-h|--help|-v|--version|--selfupdate|--filetype=([a-zA-Z0-9]+)|-t|-T|--tee] [filename]"
+  puts "[USAGE]: few [-h|--help|-v|--version|--selfupdate|--filetype={filetype}|-t|-T|--tee] [filename]"
   puts "[EXAMPLES]: few {filename}"
   puts "            cat {filename} | few"
   puts "            make |& few --tee"
@@ -262,7 +262,7 @@ when '--selfupdate'
   raise unless /^#!/ =~ code
   File.open(__FILE__, 'w') {|io| io.print code }
   system __FILE__, '-v'
-when /--filetype=([a-zA-Z0-9]+)/
+when /--filetype=(\w+)/
   ARGV.shift
   few(:filetype => $1.to_sym)
 when '--tee', '-t', '-T'
