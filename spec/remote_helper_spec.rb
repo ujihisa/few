@@ -5,11 +5,9 @@ describe Few::RemoteHelper do
     @r = Few::RemoteHelper.new
   end
 
-  it 'generates key pair by generate_key_pair' do
+  it 'generates key pair by generate_key_pair, and gets keys by accessors' do
     @r.generate_key_pair
-  end
 
-  it 'can get keys' do
     @r.public_key.should  be_a_kind_of(String)
     @r.private_key.should be_a_kind_of(String)
     @pub  = @r.public_key
