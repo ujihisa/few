@@ -165,7 +165,7 @@ class Few
     dirs = %w[few fewfiles]
     dirs.delete_if {|x| !File.exist?(File.expand_path("~") + '/' + x) }
     if dirs.length > 0
-      dir = config_files[0]
+      dir = config_files[0] # NOTE: Where is the var `config_files` from? I guess it's `dirs`
       dir + '/' + path
     else; nil
     end
