@@ -150,8 +150,9 @@ class Few
 
   def load_config
     return if $few_speccing
-    config_files = ['_fewrc','.fewrc','.few.conf','few.conf','.fewrc.rb','_fewrc.rb','fewrc.rb']
-    config_files.delete_if{|x| !File.exist?(File.expand_path("~") + '/' + x)}
+    config_files =
+      %w[_fewrc .fewrc .few.conf few.conf .fewrc.rb _fewrc.rb fewrc.rb]
+    config_files.delete_if {|x| !File.exist?(File.expand_path("~") + '/' + x) }
     if config_files.length > 0
       config_file = config_files[0]
       eval File.load(config_file)
