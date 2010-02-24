@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/spec_helper.rb'
+require File.dirname(__FILE__) + '/spec_helper'
 
 describe Few::Config do
   before(:all) do
@@ -10,6 +10,7 @@ describe Few::Config do
   end
 
   it 'can read with self.<name>' do
+    @config.b = 2
     @config.b.should == 2
   end
 
