@@ -4,6 +4,7 @@ require 'tempfile'
 require 'cgi'
 require 'kconv'
 require 'singleton'
+require 'base64'
 
 def open_browser(url)
   case RUBY_PLATFORM.downcase
@@ -67,7 +68,7 @@ class Few
       @opt         = {:private_key => nil,:public_key => nil, :remote_path => nil}.merge(o)
       @priv_key    = @opt[:private_key] ? OpenSSL::PKey::RSA.new(@opt[:private_key]) : nil
       @publ_key    = @opt[:public_key ] ? OpenSSL::PKey::RSA.new(@opt[:public_key ]) : nil
-      @remote_path = URI.parse(@opt[:remote_path])
+      @remote_path = @opt[:remote_path] ? URI.parse(@opt[:remote_path]) : nil
     end
 
     def generate_key_pair
@@ -76,25 +77,43 @@ class Few
       @opt[:public_key ] = rsa.public_key.to_s
       @priv_key          = rsa
       @publ_key          = OpenSSL::PKey::RSA.new(rsa.public_key)
+      self
     end
 
-    def private_key; @opt[:private_key]; end
-    def public_key ; @opt[:public_key ]; end
-    def remote_path; @opt[:remote_path]; end
+    def private_key    ; @opt[:private_key]; end
+    def public_key     ; @opt[:public_key ]; end
+    def remote_path    ; @opt[:remote_path]; end
+    def private_key=(x); @opt[:private_key]; @priv_key    = OpenSSL::PKey::RSA.new(@opt[:private_key]); x; end
+    def public_key=(x) ; @opt[:public_key ]; @publ_key    = OpenSSL::PKey::RSA.new(@opt[:public_key ]); x; end
+    def remote_path=(x); @opt[:remote_path]; @remote_path = URI.parse(@opt[:remote_path             ]); x; end
 
     def crypt(str)
-      @publ_key.public_encrypt(str)
+      begin
+        @publ_key.public_encrypt(str)
+      rescue NoMethodError
+        return false
+      end
     end
 
     def decrypt(str)
-      @priv_key.private_decrypt(str)
+      begin
+        @priv_key.private_decrypt(str)
+      rescue NoMethodError
+        return false
+      end
     end
 
     def send(str)
       return unless @opt[:remote_path]
       c = crypt(str)
-      Net::HTTP.start(@remote_path.host,@remote_path.port) do |h|
-        r = h.post(@remote_path.path,'public_key='+CGI.escape(@opt[:public_key])+'&body='+CGI.escape(c))
+      begin
+        Net::HTTP.start(@remote_path.host,@remote_path.port) do |h|
+          r = h.post(@remote_path.path,'public_key='+CGI.escape(@opt[:public_key])+'&body='+CGI.escape(Base64.encode64(c)))
+        end
+      rescue Net::ProtocolError
+        return false
+      else
+        return true
       end
     end
 
@@ -102,9 +121,9 @@ class Few
       return unless @opt[:remote_path]
       Net::HTTP.start(@remote_path.host,@remote_path.port) do |h|
         r = h.get(@remote_path.path+'?public_key='+CGI.escape(@opt[:public_key]))
-        begin; b = r.body.split(/\r?\n/,''); rescue; return nil; end
+        begin; b = r.body.split(/\r?\n/); rescue; return nil; end
         if b.shift.chomp == 'have'
-          return b.join('\n')
+          return decrypt(Base64.decode64(b.join('')))
         else
           return nil
         end
