@@ -45,7 +45,7 @@ describe Few::RemoteHelper do
           $few_remote_helper_spec_ww_s = {}
           get('/') do
             content_type :text
-            unless $few_remote_helper_spec_ww_s[params["public_key"]].nil?
+            if $few_remote_helper_spec_ww_s[params["public_key"]]
               r = $few_remote_helper_spec_ww_s[params["public_key"]]
               $few_remote_helper_spec_ww_s.delete(params["public_key"])
               "have\n" + r
