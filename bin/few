@@ -222,7 +222,7 @@ class Few
           white-space: pre;
           line-height: 7px;
           font-size: 12pt;
-          font-family: "menlo regular", "monaco", "courier", monospace;
+          font-family: Georgia, "menlo regular", "monaco", "courier", monospace;
         }
     </style>
   </head>
