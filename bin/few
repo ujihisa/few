@@ -191,25 +191,25 @@ class Few
       a = a.gsub(/\x1b\[([0-9]*)m/) do
         case $1
         when "","39"
-        '</font>'
+          '</font>'
         when "30"
-        '<font color="black">'
+          '<font color="black">'
         when "31"
-        '<font color="red">'
+          '<font color="red">'
         when "32"
-        '<font color="green">'
+          '<font color="green">'
         when "33"
-        '<font color="yellow">'
+          '<font color="yellow">'
         when "34"
-        '<font color="blue">'
+          '<font color="blue">'
         when "35"
-        '<font color="magenta">'
+          '<font color="magenta">'
         when "36"
-        '<font color="cyan">'
+          '<font color="cyan">'
         when "37"
-        '<font color="white">'
+          '<font color="white">'
         else
-        ''
+          ''
         end
       end
 
