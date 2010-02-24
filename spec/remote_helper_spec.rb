@@ -74,6 +74,7 @@ describe Few::RemoteHelper do
       end
 
       it 'also recieve from server by #recv' do
+        @r.send('hi').should be_true
         @r.recv.should == 'hi'
       end
     end
