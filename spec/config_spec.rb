@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/spec_helper'
 
 describe Few::Config do
   before(:all) do
-    @config = Few::Config.new
+    @config = Few::Config.new({})
   end
 
   it 'can store with self.<name>=' do

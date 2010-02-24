@@ -46,13 +46,14 @@ require_monad :rubygems, :markdown
 
 class Few
   class Config
-    def initialize(i={})
+    def initialize(i)
       @c = i
     end
-    def method_missing(n,*a)
+
+    def method_missing(n, *a)
       case n.to_s
       when /=$/
-        @c[n.to_s.gsub(/=$/,'').to_sym]=a[0]
+        @c[n.to_s.gsub(/=$/, '').to_sym] = a[0]
       else
         @c[n]
       end
