@@ -84,7 +84,7 @@ describe '`few` command' do
                   end
     (cmd == 'kfmclient' && arg == 'exec' ? arg2 : arg).should match(/\.html$/)
 
-    l = open(arg,'r').readlines
+    l = open(arg, 'r').readlines
     l[13].chomp.should match('hi')
     l[14].chomp.should match('  vi')
     l[15].chomp.should match('yay  yay')
@@ -99,13 +99,13 @@ describe '`few` command' do
     t = Tempfile.new('few').path + '.rb'
     File.open(t, 'w') {|io|
       io.puts 'print "[\""'
-      io.puts 'def system(*o); print "\",";print o[2] ? o[2].inspect : o[1].inspect; end'
+      io.puts 'def system(*o); print "\", ";print o[2] ? o[2].inspect : o[1].inspect; end'
       io.puts '$few_speccing = true'
       io.puts 'load "bin/few"'
       io.puts 'print "]"'
     }
     printed, file = *eval(`echo 'hi'|ruby #{t} --tee`)
     printed.should match('hi\n')
-    open(file,'r').readlines[13].should match('hi')
+   open(file, 'r').readlines[13].should match('hi')
   end
 end
