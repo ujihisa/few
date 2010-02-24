@@ -243,7 +243,7 @@ class Few
   attr_reader :config
 end
 
-def few(o={})
+def Few(o = {})
   Few.new(o).run
 end
 
@@ -264,15 +264,15 @@ when '--selfupdate'
   system __FILE__, '-v'
 when /--filetype=(\w+)/
   ARGV.shift
-  few(:filetype => $1.to_sym)
+  Few(:filetype => $1.to_sym)
 when '--tee', '-t', '-T'
   ARGV.shift
-  few(:tee => true, :filetype => :tee)
+  Few(:tee => true, :filetype => :tee)
 when '--remote-standing', '-r'
   puts 'Error: Sorry, this feature is not implemented yet.'
 when '--daemon', '-d'
   puts 'Error: Sorry, this feature is not implemented yet.'
 else
-  few
+  Few()
 end
 # vim: set filetype=ruby : set tabstop=2 : set shiftwidth=2
