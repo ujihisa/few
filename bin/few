@@ -161,15 +161,13 @@ class Few
   end
 
   def fewdir(path)
-    if $few_speccing
-    else 
-      dirs = ['few','fewfiles']
-      dirs.delete_if{|x| !File.exist?(File.expand_path("~") + '/' + x)}
-      if dirs.length > 0
-        dir = config_files[0]
-        dir+'/'+path
-      else; nil
-      end
+    return if $few_speccing
+    dirs = %w[few fewfiles]
+    dirs.delete_if {|x| !File.exist?(File.expand_path("~") + '/' + x) }
+    if dirs.length > 0
+      dir = config_files[0]
+      dir + '/' + path
+    else; nil
     end
   end
 
