@@ -153,9 +153,27 @@ class Few
       :private_key => @config.private_key.nil? ? nil : (File.exist?(@config.private_key) ? File.read(@config.private_key) : nil))
   end
 
-  def start
+  def start(daemonize=false)
     return self unless @opt[:remote_standing]
     abort 'ERROR: public_key or private_key not found. Try generate to this command: few --gen-keys' if @remote.public_key.nil? || @remote.private_key.nil?
+    if daemonize
+      puts 'Daemoning...'
+      if Process.respond_to?(:daemon)
+        Process.daemon
+      else
+        require 'webrick'
+        WEBrick::Daemon.start
+      end
+    end
+    loop do
+      r = @remote.recv
+      unless r.nil?
+        run(r)
+        sleep 10
+      else
+        sleep 6
+      end
+    end
   end
 
   def load_config
@@ -174,12 +192,19 @@ class Few
     if $few_speccing
       return __FILE__ + '/../fewfiles/' + path
     else
-      config_dirs = %w[few fewfiles]
+      config_dirs = %w[.few fewfiles]
       config_dirs.delete_if{|x| !File.exist?(File.expand_path("~") + '/' + x)}
       if config_dirs.length > 0
-        dir = config_dirs[0]
+        dir = File.expand_path("~") + config_dirs[0]
         dir+'/'+path
-      else; nil
+      else
+        if /mswin(?!ce)|mingw|bccwin/ == RUBY_PLATFORM
+          Dir.mkdir(File.expand_path('~') + '/fewfiles')
+          return File.expand_path('~') + '/fewfiles/'+path
+        else
+          Dir.mkdir(File.expand_path('~') + '/.few')
+          return File.expand_path('~') + '/.few/'+path
+        end
       end
     end
   end
@@ -191,7 +216,7 @@ class Few
     self
   end
 
-  def run
+  def run(i=nil)
     if @config.remote
         if @opt[:tee]
           b = ''
@@ -211,15 +236,19 @@ class Few
       t = Tempfile.new('few')
 
       File.open(t.path, 'w') do |io|
-        if @opt[:tee]
-          b = ''
-          ARGF.each do |l|
-            print l
-            b += l
+        if b.nil?
+          if @opt[:tee]
+            b = ''
+            ARGF.each do |l|
+              print l
+              b += l
+            end
+            a = CGI.escapeHTML b
+          else
+            a = CGI.escapeHTML ARGF.read.toutf8
           end
-          a = CGI.escapeHTML b
         else
-          a = CGI.escapeHTML ARGF.read.toutf8
+          a = CGI.escapeHTML i
         end
         a = a.gsub(/\r?\n/, "<br />\n")
 
@@ -308,16 +337,7 @@ when '--tee', '-t', '-T'
 when '--remote-standing', '-r'
   Few.new(:remote_standing => true).start
 when '--remote-daemon', '-d'
-  Few.new(:remote_standing => true).start
-  
-  puts 'Daemoning...'
-
-  if Process.respond_to?(:daemon)
-    Process.daemon
-  else
-    require 'webrick'
-    WEBrick::Daemon.start
-  end
+  Few.new(:remote_standing => true).start(true)
 when '--gen-keys', '--generate-keys', '--generate-key-pair'
   print 'Generating new key pair for remote... '
   f = Few.new.generate_remote_key_pair
