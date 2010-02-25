@@ -146,6 +146,11 @@ class Few
     @config = Config.new(
       :remote => false, :private_key => fewdir('key'),
       :public_key => fewdir('key.pub'), :remote_path => nil)
+    load_config
+    @remote = RemoteHelper.new(
+      :remote_path => @config.remote_path,
+      :public_key  => File.exist?(@config.public_key ) ? File.read(@config.public_key ) : nil,
+      :private_key => File.exist?(@config.private_key) ? File.read(@config.private_key) : nil)
   end
 
   def load_config
@@ -174,49 +179,73 @@ class Few
     end
   end
 
+  def generate_remote_key_pair
+    @remote.generate_key_pair
+    open(@config.public_key ,'w') { |f| f.print @remote.public_key  }
+    open(@config.private_key,'w') { |f| f.print @remote.private_key }
+    self
+  end
+
   def run
-    t = Tempfile.new('few')
-
-    File.open(t.path, 'w') do |io|
-      if @opt[:tee]
-        b = ''
-        ARGF.each do |l|
-          print l
-          b += l
-        end
-        a = CGI.escapeHTML b
-      else
-        a = CGI.escapeHTML ARGF.read.toutf8
-      end
-      a = a.gsub(/\r?\n/, "<br />\n")
-
-      a = a.gsub(/.\x08/, '')
-      a = a.gsub(/\x1b\[([0-9]*)m/) do
-        case $1
-        when "","39"
-          '</font>'
-        when "30"
-          '<font color="black">'
-        when "31"
-          '<font color="red">'
-        when "32"
-          '<font color="green">'
-        when "33"
-          '<font color="yellow">'
-        when "34"
-          '<font color="blue">'
-        when "35"
-          '<font color="magenta">'
-        when "36"
-          '<font color="cyan">'
-        when "37"
-          '<font color="white">'
+    if @config.remote
+        if @opt[:tee]
+          b = ''
+          ARGF.each do |l|
+            print l
+            b += l
+          end
+          a = CGI.escapeHTML b
         else
-          ''
+          a = CGI.escapeHTML ARGF.read.toutf8
         end
-      end
+        unless @remote.public_key
+          STDERR.puts "ERROR: public_key not found.. generate new key pair."
+          generate_remote_key_pair
+        end
+        @remote.send(a)
+    else
+      t = Tempfile.new('few')
 
-      io.puts <<-EOF
+      File.open(t.path, 'w') do |io|
+        if @opt[:tee]
+          b = ''
+          ARGF.each do |l|
+            print l
+            b += l
+          end
+          a = CGI.escapeHTML b
+        else
+          a = CGI.escapeHTML ARGF.read.toutf8
+        end
+        a = a.gsub(/\r?\n/, "<br />\n")
+
+        a = a.gsub(/.\x08/, '')
+        a = a.gsub(/\x1b\[([0-9]*)m/) do
+          case $1
+          when "","39"
+          '</font>'
+          when "30"
+          '<font color="black">'
+          when "31"
+          '<font color="red">'
+          when "32"
+          '<font color="green">'
+          when "33"
+          '<font color="yellow">'
+          when "34"
+          '<font color="blue">'
+          when "35"
+          '<font color="magenta">'
+          when "36"
+          '<font color="cyan">'
+          when "37"
+          '<font color="white">'
+          else
+          ''
+          end
+        end
+
+        io.puts <<-EOF
 <html>
   <head>
     <title>few: #{ARGF.filename} (#{@opt[:filetype].to_s})</title>
@@ -230,19 +259,20 @@ class Few
     </style>
   </head>
   <body>
-      #{a}
+        #{a}
   </body>
 </html>
     EOF
+      end
+
+      t.close
+
+      File.rename(t.path, html = t.path + '.html')
+
+      open_browser(html)
     end
-
-    t.close
-
-    File.rename(t.path, html = t.path + '.html')
-
-    open_browser(html)
-
   end
+
   attr_reader :config
 end
 
