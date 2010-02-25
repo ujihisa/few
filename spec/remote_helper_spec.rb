@@ -5,11 +5,9 @@ describe Few::RemoteHelper do
     @r = Few::RemoteHelper.new
   end
 
-  it 'generate key pair by generate_key_pair' do
+  it 'generates key pair by generate_key_pair, and gets keys by accessors' do
     @r.generate_key_pair
-  end
 
-  it 'can get keys' do
     @r.public_key.should  be_a_kind_of(String)
     @r.private_key.should be_a_kind_of(String)
     @pub  = @r.public_key
@@ -17,7 +15,7 @@ describe Few::RemoteHelper do
   end
 
   it 'can create with exist key pair' do
-    @r = Few::RemoteHelper.new(:public_key => @pub,:private_key => @priv)
+    @r = Few::RemoteHelper.new(:public_key => @pub, :private_key => @priv)
     @r.public_key.should  == @pub
     @r.private_key.should == @priv
   end
@@ -35,7 +33,8 @@ describe Few::RemoteHelper do
   begin
     require 'ww/server'
   rescue LoadError
-    puts "WARNING: You're not installed 'ww' library, don't run send and recv specs now."
+    puts "WARNING: You're not installed 'ww' library, " +
+      "don't run send and recv specs now."
   else
     describe 'send and recv' do
       before(:all) do
@@ -46,7 +45,7 @@ describe Few::RemoteHelper do
           $few_remote_helper_spec_ww_s = {}
           get('/') do
             content_type :text
-            unless $few_remote_helper_spec_ww_s[params["public_key"]].nil?
+            if $few_remote_helper_spec_ww_s[params["public_key"]]
               r = $few_remote_helper_spec_ww_s[params["public_key"]]
               $few_remote_helper_spec_ww_s.delete(params["public_key"])
               "have\n" + r
@@ -65,7 +64,9 @@ describe Few::RemoteHelper do
       end
 
       before do
-        @r = Few::RemoteHelper.new(:public_key => @pub,:private_key => @priv,:remote_path => 'http://localhost:4328/')
+        @r = Few::RemoteHelper.new(
+          :public_key => @pub, :private_key => @priv,
+          :remote_path => 'http://localhost:4328/')
       end
 
       it 'also send to server by #send' do
@@ -73,6 +74,7 @@ describe Few::RemoteHelper do
       end
 
       it 'also recieve from server by #recv' do
+        @r.send('hi').should be_true
         @r.recv.should == 'hi'
       end
     end

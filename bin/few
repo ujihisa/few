@@ -46,13 +46,14 @@ require_monad :rubygems, :markdown
 
 class Few
   class Config
-    def initialize(i={})
+    def initialize(i)
       @c = i
     end
-    def method_missing(n,*a)
+
+    def method_missing(n, *a)
       case n.to_s
       when /=$/
-        @c[n.to_s.gsub(/=$/,'').to_sym]=a[0]
+        @c[n.to_s.gsub(/=$/, '').to_sym] = a[0]
       else
         @c[n]
       end
@@ -60,15 +61,20 @@ class Few
   end
 
   class RemoteHelper
-    def initialize(o={})
+    def initialize(o = {})
       require 'net/http'
       require 'openssl'
       require 'uri'
       require 'cgi'
-      @opt         = {:private_key => nil,:public_key => nil, :remote_path => nil}.merge(o)
-      @priv_key    = @opt[:private_key] ? OpenSSL::PKey::RSA.new(@opt[:private_key]) : nil
-      @publ_key    = @opt[:public_key ] ? OpenSSL::PKey::RSA.new(@opt[:public_key ]) : nil
-      @remote_path = @opt[:remote_path] ? URI.parse(@opt[:remote_path]) : nil
+      @opt = {
+        :private_key => nil, :public_key => nil, :remote_path => nil
+      }.merge(o)
+      @priv_key = @opt[:private_key] ?
+        OpenSSL::PKey::RSA.new(@opt[:private_key]) : nil
+      @publ_key = @opt[:public_key ] ?
+        OpenSSL::PKey::RSA.new(@opt[:public_key ]) : nil
+      @remote_path = @opt[:remote_path] ?
+        URI.parse(@opt[:remote_path]) : nil
     end
 
     def generate_key_pair
@@ -80,11 +86,11 @@ class Few
       self
     end
 
-    def private_key    ; @opt[:private_key]; end
-    def public_key     ; @opt[:public_key ]; end
-    def remote_path    ; @opt[:remote_path]; end
+    def private_key;     @opt[:private_key]; end
+    def public_key;      @opt[:public_key ]; end
+    def remote_path;     @opt[:remote_path]; end
     def private_key=(x); @opt[:private_key]; @priv_key    = OpenSSL::PKey::RSA.new(@opt[:private_key]); x; end
-    def public_key=(x) ; @opt[:public_key ]; @publ_key    = OpenSSL::PKey::RSA.new(@opt[:public_key ]); x; end
+    def public_key=(x);  @opt[:public_key ]; @publ_key    = OpenSSL::PKey::RSA.new(@opt[:public_key ]); x; end
     def remote_path=(x); @opt[:remote_path]; @remote_path = URI.parse(@opt[:remote_path             ]); x; end
 
     def crypt(str)
@@ -107,8 +113,11 @@ class Few
       return unless @opt[:remote_path]
       c = crypt(str)
       begin
-        Net::HTTP.start(@remote_path.host,@remote_path.port) do |h|
-          r = h.post(@remote_path.path,'public_key='+CGI.escape(@opt[:public_key])+'&body='+CGI.escape(Base64.encode64(c)))
+        Net::HTTP.start(@remote_path.host, @remote_path.port) do |h|
+          r = h.post(
+            @remote_path.path,
+            'public_key=' + CGI.escape(@opt[:public_key]) +
+            '&body=' + CGI.escape(Base64.encode64(c)))
         end
       rescue Net::ProtocolError
         return false
@@ -119,8 +128,9 @@ class Few
 
     def recv
       return unless @opt[:remote_path]
-      Net::HTTP.start(@remote_path.host,@remote_path.port) do |h|
-        r = h.get(@remote_path.path+'?public_key='+CGI.escape(@opt[:public_key]))
+      Net::HTTP.start(@remote_path.host, @remote_path.port) do |h|
+        r = h.get(
+          @remote_path.path + '?public_key=' + CGI.escape(@opt[:public_key]))
         begin; b = r.body.split(/\r?\n/); rescue; return nil; end
         if b.shift.chomp == 'have'
           return decrypt(Base64.decode64(b.join('')))
@@ -133,13 +143,16 @@ class Few
 
   def initialize(o)
     @opt = {:filetype => :text, :tee => false, :server => false}.merge(o)
-    @config = Config.new(:remote => false, :private_key => fewdir('key'), :public_key => fewdir('key.pub'),:remote_path => nil)
+    @config = Config.new(
+      :remote => false, :private_key => fewdir('key'),
+      :public_key => fewdir('key.pub'), :remote_path => nil)
   end
 
   def load_config
     return if $few_speccing
-    config_files = ['_fewrc','.fewrc','.few.conf','few.conf','.fewrc.rb','_fewrc.rb','fewrc.rb']
-    config_files.delete_if{|x| !File.exist?(File.expand_path("~") + '/' + x)}
+    config_files =
+      %w[_fewrc .fewrc .few.conf few.conf .fewrc.rb _fewrc.rb fewrc.rb]
+    config_files.delete_if {|x| !File.exist?(File.expand_path("~") + '/' + x) }
     if config_files.length > 0
       config_file = config_files[0]
       eval File.load(config_file)
@@ -151,10 +164,10 @@ class Few
     if $few_speccing
       return __FILE__ + '/../fewfiles/' + path
     else
-      dirs = ['.few','few','fewfiles']
-      dirs.delete_if{|x| !File.exist?(File.expand_path("~") + '/' + x)}
+      config_dirs = %w[few fewfiles]
+      config_dirs.delete_if{|x| !File.exist?(File.expand_path("~") + '/' + x)}
       if dirs.length > 0
-        dir = config_files[0]
+        dir = config_dirs[0]
         dir+'/'+path
       else; nil
       end
@@ -181,25 +194,25 @@ class Few
       a = a.gsub(/\x1b\[([0-9]*)m/) do
         case $1
         when "","39"
-        '</font>'
+          '</font>'
         when "30"
-        '<font color="black">'
+          '<font color="black">'
         when "31"
-        '<font color="red">'
+          '<font color="red">'
         when "32"
-        '<font color="green">'
+          '<font color="green">'
         when "33"
-        '<font color="yellow">'
+          '<font color="yellow">'
         when "34"
-        '<font color="blue">'
+          '<font color="blue">'
         when "35"
-        '<font color="magenta">'
+          '<font color="magenta">'
         when "36"
-        '<font color="cyan">'
+          '<font color="cyan">'
         when "37"
-        '<font color="white">'
+          '<font color="white">'
         else
-        ''
+          ''
         end
       end
 
@@ -212,7 +225,7 @@ class Few
           white-space: pre;
           line-height: 7px;
           font-size: 12pt;
-          font-family: "menlo regular", "monaco", "courier", monospace;
+          font-family: Georgia, "menlo regular", "monaco", "courier", monospace;
         }
     </style>
   </head>
@@ -233,13 +246,13 @@ class Few
   attr_reader :config
 end
 
-def few(o={})
+def Few(o = {})
   Few.new(o).run
 end
 
 case ARGV[0]
 when '-h', '--help'
-  puts "[USAGE]: few [-h|--help|-v|--version|--selfupdate|--filetype=([a-zA-Z0-9]+)|-t|-T|--tee] [filename]"
+  puts "[USAGE]: few [-h|--help|-v|--version|--selfupdate|--filetype={filetype}|-t|-T|--tee] [filename]"
   puts "[EXAMPLES]: few {filename}"
   puts "            cat {filename} | few"
   puts "            make |& few --tee"
@@ -247,21 +260,22 @@ when '-v', '--version'
   puts "0.0.2"
 when '--selfupdate'
   require 'open-uri'
-  code = open('http://github.com/ujihisa/few/raw/master/bin/few') {|io| io.read }
+  code =
+    open('http://github.com/ujihisa/few/raw/master/bin/few') {|io| io.read }
   raise unless /^#!/ =~ code
   File.open(__FILE__, 'w') {|io| io.print code }
   system __FILE__, '-v'
-when /--filetype=([a-zA-Z0-9]+)/
+when /--filetype=(\w+)/
   ARGV.shift
-  few(:filetype => $1.to_sym)
+  Few(:filetype => $1.to_sym)
 when '--tee', '-t', '-T'
   ARGV.shift
-  few(:tee => true, :filetype => :tee)
+  Few(:tee => true, :filetype => :tee)
 when '--remote-standing', '-r'
   puts 'Error: Sorry, this feature is not implemented yet.'
 when '--daemon', '-d'
   puts 'Error: Sorry, this feature is not implemented yet.'
 else
-  few
+  Few()
 end
 # vim: set filetype=ruby : set tabstop=2 : set shiftwidth=2
