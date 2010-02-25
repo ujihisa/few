@@ -149,8 +149,9 @@ class Few
 
   def fewdir(path)
     if $few_speccing
-    else 
-      dirs = ['few','fewfiles']
+      return __FILE__ + '/../fewfiles/' + path
+    else
+      dirs = ['.few','few','fewfiles']
       dirs.delete_if{|x| !File.exist?(File.expand_path("~") + '/' + x)}
       if dirs.length > 0
         dir = config_files[0]
