@@ -78,7 +78,7 @@ class Few
     end
 
     def generate_key_pair
-      rsa                = OpenSSL::PKey::RSA.generate(2048)
+      rsa                = OpenSSL::PKey::RSA.generate(4096)
       @opt[:private_key] = rsa.export
       @opt[:public_key ] = rsa.public_key.to_s
       @priv_key          = rsa
@@ -120,7 +120,7 @@ class Few
             '&body=' + CGI.escape(Base64.encode64(c)))
         end
       rescue Net::ProtocolError
-        return false
+        return r
       else
         return true
       end
@@ -132,7 +132,9 @@ class Few
         r = h.get(
           @remote_path.path + '?public_key=' + CGI.escape(@opt[:public_key]))
         begin; b = r.body.split(/\r?\n/); rescue; return nil; end
-        if b.shift.chomp == 'have'
+        s = b.shift
+        return nil if s.nil?
+        if s.chomp == 'have'
           return decrypt(Base64.decode64(b.join('')))
         else
           return nil
@@ -141,7 +143,7 @@ class Few
     end
   end
 
-  def initialize(o)
+  def initialize(o={})
     @opt = {:filetype => :text, :tee => false, :server => false}.merge(o)
     @config = Config.new(
       :remote => false, :private_key => fewdir('key'),
@@ -165,10 +167,14 @@ class Few
         WEBrick::Daemon.start
       end
     end
+    puts "Started"
     loop do
       r = @remote.recv
       unless r.nil?
+        puts "Received body"
+        puts "Running..."
         run(r)
+        puts "Opened browser"
         sleep 10
       else
         sleep 6
@@ -183,7 +189,7 @@ class Few
     config_files.delete_if {|x| !File.exist?(File.expand_path("~") + '/' + x) }
     if config_files.length > 0
       config_file = config_files[0]
-      eval File.load(config_file)
+      eval File.read(File.expand_path('~') + '/' + config_file)
     end
     self
   end
@@ -195,7 +201,7 @@ class Few
       config_dirs = %w[.few fewfiles]
       config_dirs.delete_if{|x| !File.exist?(File.expand_path("~") + '/' + x)}
       if config_dirs.length > 0
-        dir = File.expand_path("~") + config_dirs[0]
+        dir = File.expand_path("~") + '/' + config_dirs[0]
         dir+'/'+path
       else
         if /mswin(?!ce)|mingw|bccwin/ == RUBY_PLATFORM
@@ -217,7 +223,7 @@ class Few
   end
 
   def run(i=nil)
-    if @config.remote
+    if @config.remote && i.nil?
         if @opt[:tee]
           b = ''
           ARGF.each do |l|
@@ -231,12 +237,14 @@ class Few
         unless @remote.public_key
           abort 'ERROR: public_key not found. If you not have keys, try generate to this command (on host): few --gen-keys, If you have keys, trans to ~/.few .'
         end
-        @remote.send(a)
+        unless (r = @remote.send(a)) == true
+          abort "ERROR: #{r.inspect}"
+        end
     else
       t = Tempfile.new('few')
 
       File.open(t.path, 'w') do |io|
-        if b.nil?
+        if i.nil?
           if @opt[:tee]
             b = ''
             ARGF.each do |l|
@@ -281,7 +289,7 @@ class Few
         io.puts <<-EOF
 <html>
   <head>
-    <title>few: #{ARGF.filename} (#{@opt[:filetype].to_s})</title>
+    <title>few: #{i.nil? ? ARGF.filename : '-'} (#{@opt[:filetype].to_s})</title>
     <style type="text/css">
         body {
           white-space: pre;

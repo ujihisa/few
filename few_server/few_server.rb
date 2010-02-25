@@ -31,7 +31,7 @@ if cgi.has_key?('body')
     puts "ok"
   end
 else
-  db.transaction(true) do
+  db.transaction do
     if db[cgi['public_key']].nil?
       puts 'no'
     else
