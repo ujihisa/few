@@ -146,6 +146,34 @@ class Few
     @config = Config.new(
       :remote => false, :private_key => fewdir('key'),
       :public_key => fewdir('key.pub'), :remote_path => nil)
+    load_config
+    @remote = RemoteHelper.new(
+      :remote_path => @config.remote_path,
+      :public_key  => @config.public_key.nil?  ? nil : (File.exist?(@config.public_key ) ? File.read(@config.public_key ) : nil),
+      :private_key => @config.private_key.nil? ? nil : (File.exist?(@config.private_key) ? File.read(@config.private_key) : nil))
+  end
+
+  def start(daemonize=false)
+    return self unless @opt[:remote_standing]
+    abort 'ERROR: public_key or private_key not found. Try generate to this command: few --gen-keys' if @remote.public_key.nil? || @remote.private_key.nil?
+    if daemonize
+      puts 'Daemoning...'
+      if Process.respond_to?(:daemon)
+        Process.daemon
+      else
+        require 'webrick'
+        WEBrick::Daemon.start
+      end
+    end
+    loop do
+      r = @remote.recv
+      unless r.nil?
+        run(r)
+        sleep 10
+      else
+        sleep 6
+      end
+    end
   end
 
   def load_config
@@ -164,59 +192,93 @@ class Few
     if $few_speccing
       return __FILE__ + '/../fewfiles/' + path
     else
-      config_dirs = %w[few fewfiles]
+      config_dirs = %w[.few fewfiles]
       config_dirs.delete_if{|x| !File.exist?(File.expand_path("~") + '/' + x)}
-      if dirs.length > 0
-        dir = config_dirs[0]
+      if config_dirs.length > 0
+        dir = File.expand_path("~") + config_dirs[0]
         dir+'/'+path
-      else; nil
+      else
+        if /mswin(?!ce)|mingw|bccwin/ == RUBY_PLATFORM
+          Dir.mkdir(File.expand_path('~') + '/fewfiles')
+          return File.expand_path('~') + '/fewfiles/'+path
+        else
+          Dir.mkdir(File.expand_path('~') + '/.few')
+          return File.expand_path('~') + '/.few/'+path
+        end
       end
     end
   end
 
-  def run
-    t = Tempfile.new('few')
+  def generate_remote_key_pair
+    @remote.generate_key_pair
+    open(@config.public_key ,'w') { |f| f.print @remote.public_key  }
+    open(@config.private_key,'w') { |f| f.print @remote.private_key }
+    self
+  end
 
-    File.open(t.path, 'w') do |io|
-      if @opt[:tee]
-        b = ''
-        ARGF.each do |l|
-          print l
-          b += l
-        end
-        a = CGI.escapeHTML b
-      else
-        a = CGI.escapeHTML ARGF.read.toutf8
-      end
-      a = a.gsub(/\r?\n/, "<br />\n")
-
-      a = a.gsub(/.\x08/, '')
-      a = a.gsub(/\x1b\[([0-9]*)m/) do
-        case $1
-        when "","39"
-          '</font>'
-        when "30"
-          '<font color="black">'
-        when "31"
-          '<font color="red">'
-        when "32"
-          '<font color="green">'
-        when "33"
-          '<font color="yellow">'
-        when "34"
-          '<font color="blue">'
-        when "35"
-          '<font color="magenta">'
-        when "36"
-          '<font color="cyan">'
-        when "37"
-          '<font color="white">'
+  def run(i=nil)
+    if @config.remote
+        if @opt[:tee]
+          b = ''
+          ARGF.each do |l|
+            print l
+            b += l
+          end
+          a = CGI.escapeHTML b
         else
-          ''
+          a = CGI.escapeHTML ARGF.read.toutf8
         end
-      end
+        unless @remote.public_key
+          abort 'ERROR: public_key not found. If you not have keys, try generate to this command (on host): few --gen-keys, If you have keys, trans to ~/.few .'
+        end
+        @remote.send(a)
+    else
+      t = Tempfile.new('few')
 
-      io.puts <<-EOF
+      File.open(t.path, 'w') do |io|
+        if b.nil?
+          if @opt[:tee]
+            b = ''
+            ARGF.each do |l|
+              print l
+              b += l
+            end
+            a = CGI.escapeHTML b
+          else
+            a = CGI.escapeHTML ARGF.read.toutf8
+          end
+        else
+          a = CGI.escapeHTML i
+        end
+        a = a.gsub(/\r?\n/, "<br />\n")
+
+        a = a.gsub(/.\x08/, '')
+        a = a.gsub(/\x1b\[([0-9]*)m/) do
+          case $1
+          when "","39"
+          '</font>'
+          when "30"
+          '<font color="black">'
+          when "31"
+          '<font color="red">'
+          when "32"
+          '<font color="green">'
+          when "33"
+          '<font color="yellow">'
+          when "34"
+          '<font color="blue">'
+          when "35"
+          '<font color="magenta">'
+          when "36"
+          '<font color="cyan">'
+          when "37"
+          '<font color="white">'
+          else
+          ''
+          end
+        end
+
+        io.puts <<-EOF
 <html>
   <head>
     <title>few: #{ARGF.filename} (#{@opt[:filetype].to_s})</title>
@@ -230,19 +292,20 @@ class Few
     </style>
   </head>
   <body>
-      #{a}
+        #{a}
   </body>
 </html>
     EOF
+      end
+
+      t.close
+
+      File.rename(t.path, html = t.path + '.html')
+
+      open_browser(html)
     end
-
-    t.close
-
-    File.rename(t.path, html = t.path + '.html')
-
-    open_browser(html)
-
   end
+
   attr_reader :config
 end
 
@@ -272,9 +335,15 @@ when '--tee', '-t', '-T'
   ARGV.shift
   Few(:tee => true, :filetype => :tee)
 when '--remote-standing', '-r'
-  puts 'Error: Sorry, this feature is not implemented yet.'
-when '--daemon', '-d'
-  puts 'Error: Sorry, this feature is not implemented yet.'
+  Few.new(:remote_standing => true).start
+when '--remote-daemon', '-d'
+  Few.new(:remote_standing => true).start(true)
+when '--gen-keys', '--generate-keys', '--generate-key-pair'
+  print 'Generating new key pair for remote... '
+  f = Few.new.generate_remote_key_pair
+  puts 'done.'
+  puts "Send #{f.fewdir(f.config.public_key)} to remote host ~/.few ~/fewfiles, and write `config.remote = true` to remote ~/.fewrc ."
+  puts 'To standby to recieve, start few with `-r` or `-d` (-r with daemon) option.'
 else
   Few()
 end
