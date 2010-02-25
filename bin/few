@@ -149,8 +149,13 @@ class Few
     load_config
     @remote = RemoteHelper.new(
       :remote_path => @config.remote_path,
-      :public_key  => File.exist?(@config.public_key ) ? File.read(@config.public_key ) : nil,
-      :private_key => File.exist?(@config.private_key) ? File.read(@config.private_key) : nil)
+      :public_key  => @config.public_key.nil?  ? nil : (File.exist?(@config.public_key ) ? File.read(@config.public_key ) : nil),
+      :private_key => @config.private_key.nil? ? nil : (File.exist?(@config.private_key) ? File.read(@config.private_key) : nil))
+  end
+
+  def start
+    return self unless @opt[:remote_standing]
+    abort 'ERROR: public_key or private_key not found. Try generate to this command: few --gen-keys' if @remote.public_key.nil? || @remote.private_key.nil?
   end
 
   def load_config
@@ -171,7 +176,7 @@ class Few
     else
       config_dirs = %w[few fewfiles]
       config_dirs.delete_if{|x| !File.exist?(File.expand_path("~") + '/' + x)}
-      if dirs.length > 0
+      if config_dirs.length > 0
         dir = config_dirs[0]
         dir+'/'+path
       else; nil
@@ -199,8 +204,7 @@ class Few
           a = CGI.escapeHTML ARGF.read.toutf8
         end
         unless @remote.public_key
-          STDERR.puts "ERROR: public_key not found.. generate new key pair."
-          generate_remote_key_pair
+          abort 'ERROR: public_key not found. If you not have keys, try generate to this command (on host): few --gen-keys, If you have keys, trans to ~/.few .'
         end
         @remote.send(a)
     else
@@ -302,9 +306,24 @@ when '--tee', '-t', '-T'
   ARGV.shift
   Few(:tee => true, :filetype => :tee)
 when '--remote-standing', '-r'
-  puts 'Error: Sorry, this feature is not implemented yet.'
-when '--daemon', '-d'
-  puts 'Error: Sorry, this feature is not implemented yet.'
+  Few.new(:remote_standing => true).start
+when '--remote-daemon', '-d'
+  Few.new(:remote_standing => true).start
+  
+  puts 'Daemoning...'
+
+  if Process.respond_to?(:daemon)
+    Process.daemon
+  else
+    require 'webrick'
+    WEBrick::Daemon.start
+  end
+when '--gen-keys', '--generate-keys', '--generate-key-pair'
+  print 'Generating new key pair for remote... '
+  f = Few.new.generate_remote_key_pair
+  puts 'done.'
+  puts "Send #{f.fewdir(f.config.public_key)} to remote host ~/.few ~/fewfiles, and write `config.remote = true` to remote ~/.fewrc ."
+  puts 'To standby to recieve, start few with `-r` or `-d` (-r with daemon) option.'
 else
   Few()
 end
