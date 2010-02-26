@@ -78,7 +78,7 @@ class Few
     end
 
     def generate_key_pair
-      rsa                = OpenSSL::PKey::RSA.generate(4096)
+      rsa                = OpenSSL::PKey::RSA.generate(2048)
       @opt[:private_key] = rsa.export
       @opt[:public_key ] = rsa.public_key.to_s
       @priv_key          = rsa
@@ -94,16 +94,28 @@ class Few
     def remote_path=(x); @opt[:remote_path]; @remote_path = URI.parse(@opt[:remote_path             ]); x; end
 
     def crypt(str)
+      r = OpenSSL::Cipher::AES.new("256-CBC")
+      p = (1..32).map{(rand(95)+33).chr}.join
+      r.encrypt
+      r.pkcs5_keyivgen(p)
+      c =  r.update(str)
+      c << r.final
       begin
-        @publ_key.public_encrypt(str)
+        [Base64.encode64(c),Base64.encode64(@publ_key.public_encrypt(p))]
       rescue NoMethodError
         return false
       end
     end
 
-    def decrypt(str)
+    def decrypt(str,key)
+      r = OpenSSL::Cipher::AES.new("256-CBC")
+      r.decrypt
       begin
-        @priv_key.private_decrypt(str)
+        k = @priv_key.private_decrypt(Base64.decode64(key))
+        r.pkcs5_keyivgen(k)
+        s =  r.update(Base64.decode64(str))
+        s << r.final
+        return s
       rescue NoMethodError
         return false
       end
@@ -117,7 +129,7 @@ class Few
           r = h.post(
             @remote_path.path,
             'public_key=' + CGI.escape(@opt[:public_key]) +
-            '&body=' + CGI.escape(Base64.encode64(c)))
+            '&body=' + CGI.escape(c[0]) + '&aes_key=' + CGI.escape(c[1]))
         end
       rescue Net::ProtocolError
         return r
@@ -135,7 +147,8 @@ class Few
         s = b.shift
         return nil if s.nil?
         if s.chomp == 'have'
-          return decrypt(Base64.decode64(b.join('')))
+          kb = b.join("\n").split(/\n\n--- \('\.v\.'\) < hi ---\n/)
+          decrypt(*kb)
         else
           return nil
         end

@@ -18,10 +18,16 @@ cgi = CGI.new
 db = PStore.new(STORE_FILE)
 error_exit unless cgi.has_key?('public_key')
 
-if cgi.has_key?('body')
+db.transaction do
+  db['body']    ||= {}
+  db['aes_key'] ||= {}
+end
+
+if cgi.has_key?('body') && cgi.has_key?('aes_key')
   begin
     db.transaction do
-      db[cgi['public_key']] = cgi['body']
+      db['body'][cgi['public_key']] = cgi['body']
+      db['aes_key'][cgi['public_key']] = cgi['aes_key']
     end
   rescue
     error_exit
@@ -32,12 +38,13 @@ if cgi.has_key?('body')
   end
 else
   db.transaction do
-    if db[cgi['public_key']].nil?
+    if db['body'][cgi['public_key']].nil? && db['aes_key'][cgi['public_key']].nil?
       puts 'no'
     else
       puts 'have'
-      print db[cgi['public_key']]
-      db.delete(cgi['public_key'])
+      print db['body'][cgi['public_key']] + "\n--- ('.v.') < hi ---\n" + db['aes_key'][cgi['public_key']]
+      db['body'].delete(cgi['public_key'])
+      db['aes_key'].delete(cgi['public_key'])
     end
   end
 end

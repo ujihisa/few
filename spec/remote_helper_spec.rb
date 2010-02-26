@@ -22,12 +22,14 @@ describe Few::RemoteHelper do
 
   it 'crypt can crypt a string' do
     @crypted      = @r.crypt('hi')
-    @crypted.should be_a_kind_of(String)
+    @crypted.should    be_a_kind_of(Array)
+    @crypted[0].should be_a_kind_of(String)
+    @crypted[1].should be_a_kind_of(String)
   end
 
   it 'decrypt can decrypt a string' do
     @crypted      = @r.crypt('hi')
-    @r.decrypt(@crypted).should == 'hi'
+    @r.decrypt(*@crypted).should == 'hi'
   end
 
   begin
@@ -42,13 +44,16 @@ describe Few::RemoteHelper do
         @pub  = r.public_key
         @priv = r.private_key
         Ww::Server[:few_server] ||= Ww::Server.build_double(4328) do
-          $few_remote_helper_spec_ww_s = {}
+          $few_remote_helper_spec_ww_s     = {}
+          $few_remote_helper_spec_ww_s_key = {}
           get('/') do
             content_type :text
-            if $few_remote_helper_spec_ww_s[params["public_key"]]
+            if $few_remote_helper_spec_ww_s[params["public_key"]] && $few_remote_helper_spec_ww_s_key[params["public_key"]]
               r = $few_remote_helper_spec_ww_s[params["public_key"]]
+              k = $few_remote_helper_spec_ww_s_key[params["public_key"]]
               $few_remote_helper_spec_ww_s.delete(params["public_key"])
-              "have\n" + r
+              $few_remote_helper_spec_ww_s_key.delete(params["public_key"])
+              "have\n" + r + "\n--- ('.v.') < hi ---\n" + k
             else
               "no"
             end
@@ -57,6 +62,7 @@ describe Few::RemoteHelper do
           post('/') do
             content_type :text
             $few_remote_helper_spec_ww_s[params["public_key"]] = params["body"]
+            $few_remote_helper_spec_ww_s_key[params["public_key"]] = params["aes_key"]
             "ok\n"
           end
         end
