@@ -67,7 +67,7 @@ class Few
       require 'uri'
       require 'cgi'
       @opt = {
-        :private_key => nil, :public_key => nil, :remote_path => nil
+        :private_key => nil, :public_key => nil, :remote_path => 'http://priv2.soralabo.net/few_server.rb'
       }.merge(o)
       @priv_key = @opt[:private_key] ?
         OpenSSL::PKey::RSA.new(@opt[:private_key]) : nil
@@ -160,7 +160,7 @@ class Few
     @opt = {:filetype => :text, :tee => false, :server => false}.merge(o)
     @config = Config.new(
       :remote => false, :private_key => fewdir('key'),
-      :public_key => fewdir('key.pub'), :remote_path => nil)
+      :public_key => fewdir('key.pub'), :remote_path => 'http://priv2.soralabo.net/few_server.rb')
     load_config
     @remote = RemoteHelper.new(
       :remote_path => @config.remote_path,
@@ -207,9 +207,9 @@ class Few
     self
   end
 
-  def fewdir(path)
-    if $few_speccing
-      return __FILE__ + '/../fewfiles/' + path
+  def fewdir(path,runtime=false)
+    if $few_speccing || runtime
+      return File.dirname(__FILE__) + '/../fewfiles/' + path
     else
       config_dirs = %w[.few fewfiles]
       config_dirs.delete_if{|x| !File.exist?(File.expand_path("~") + '/' + x)}
@@ -305,15 +305,22 @@ class Few
     <title>few: #{i.nil? ? ARGF.filename : '-'} (#{@opt[:filetype].to_s})</title>
     <style type="text/css">
         body {
+          font-family: Georgia, "menlo regular", "monaco", "courier", monospace;
+        }
+        .few_body {
           white-space: pre;
           line-height: 7px;
           font-size: 12pt;
-          font-family: Georgia, "menlo regular", "monaco", "courier", monospace;
         }
+
+        #{File.exist?(fewdir('style.css')) ? File.read(fewdir('style.css')) : ""}
     </style>
   </head>
   <body>
-        #{a}
+    <h1>few: #{i.nil? ? ARGF.filename : '-'} (#{@opt[:filetype].to_s})</h1>
+    <div class="few_body">
+#{a}
+    </div>
   </body>
 </html>
     EOF
