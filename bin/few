@@ -207,6 +207,10 @@ class Few
     self
   end
 
+  def init_ftdetects
+    files = fewdirs('ftdetect') + fewdirs('ftdetect',true)
+  end
+
   def fewdir(path,runtime=false)
     if $few_speccing || runtime
       return File.dirname(__FILE__) + '/../fewfiles/' + path
@@ -225,6 +229,13 @@ class Few
           return File.expand_path('~') + '/.few/'+path
         end
       end
+    end
+  end
+
+  def fewdirs(path,runtime=false)
+    if File.exist?(fewdir(path,runtime)) && FileTest.directory?(fewdir(path,runtime))
+      Dir.entries(fewdir(path,runtime))
+    else; []
     end
   end
 
