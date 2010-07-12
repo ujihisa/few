@@ -252,7 +252,8 @@ class Few
         a = ARGF.read.toutf8
       end
       unless @remote.public_key
-        abort 'ERROR: public_key not found. If you not have keys, try generate to this command (on host): few --gen-keys, If you have keys, trans to ~/.few .'
+        abort "ERROR: public_key is not found. If you don't have keys, try to generate one with this command on host: few --gen-keys\n" +
+          "  If you have keys, just move them to ~/.few"
       end
       unless (r = @remote.send(a)) == true
         abort "ERROR: #{r.inspect}"
@@ -348,6 +349,3 @@ end
 def Few(o = {})
   Few.new(o).run
 end
-
-
-
