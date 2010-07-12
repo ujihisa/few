@@ -239,24 +239,24 @@ class Few
     self
   end
 
-  def run(i=nil)
+  def run(i = nil)
     if @config.remote && i.nil?
-        if @opt[:tee]
-          b = ''
-          ARGF.each do |l|
-            print l
-            b += l
-          end
-          a = b
-        else
-          a = ARGF.read.toutf8
+      if @opt[:tee]
+        b = ''
+        ARGF.each do |l|
+          print l
+          b += l
         end
-        unless @remote.public_key
-          abort 'ERROR: public_key not found. If you not have keys, try generate to this command (on host): few --gen-keys, If you have keys, trans to ~/.few .'
-        end
-        unless (r = @remote.send(a)) == true
-          abort "ERROR: #{r.inspect}"
-        end
+        a = b
+      else
+        a = ARGF.read.toutf8
+      end
+      unless @remote.public_key
+        abort 'ERROR: public_key not found. If you not have keys, try generate to this command (on host): few --gen-keys, If you have keys, trans to ~/.few .'
+      end
+      unless (r = @remote.send(a)) == true
+        abort "ERROR: #{r.inspect}"
+      end
     else
       t = Tempfile.new('few')
 
