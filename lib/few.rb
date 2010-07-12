@@ -273,6 +273,7 @@ class Few
         else
           a = CGI.escapeHTML i
         end
+        r = a
         a = a.gsub(/\r?\n/, "<br />\n")
 
         a = a.gsub(/.\x08/, '')
@@ -323,6 +324,9 @@ class Few
     <div class="few_body">
 #{a}
     </div>
+    <textarea col="10" row="15">
+#{r}
+    </textarea>      
   </body>
 </html>
       EOF
