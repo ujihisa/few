@@ -328,7 +328,7 @@ class Few
     </div>
     <textarea col="10" row="15">
 #{r}
-    </textarea>      
+    </textarea>
   </body>
 </html>
       EOF
