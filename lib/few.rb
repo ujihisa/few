@@ -7,7 +7,7 @@ class Few
           system 'kfmclient', 'exec', url
         elsif ENV['GNOME_DESKTOP_SESSION_ID']
           system 'gnome-open', url, :out => "/dev/null", :err => "/dev/null"
-        elsif system("exo-open -v >& /dev/null")
+        elsif system 'exo-open', '-v', :out => '/dev/null', :err => '/dev/null'
           system 'exo-open', url
         else
           system 'firefox', url
