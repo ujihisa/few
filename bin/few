@@ -22,13 +22,25 @@ require_monad :rubygems, :markdown
 
 case ARGV[0]
 when '-h', '--help'
-  puts "[USAGE]: few [-h|--help|-v|--version|--selfupdate|--filetype={filetype}|-t|-T|--tee|--server] [filename]"
-  puts "[EXAMPLES]: few {filename}"
-  puts "            cat {filename} | few"
-  puts "            make |& few --tee"
+  puts <<-EOH
+[USAGE]: few [option] [filename]
+[EXAMPLE]:
+  few foobar.txt
+  make test | few
+  make |& few --tee
+[ARGUMENTS]:
+  --version, -v       | Show version information.
+  --selfupdate        | Update few. This feature is disabled temporally. :-(
+  --filetype=         | Set filetype. Filetype feature will be used for style.
+  --tee, -t, -T       | Put strings to terminal, then open it to browser.
+  --server, -r, -s    | Start server and standing for remote.
+  --server-daemon, -d | Start --server and daemonize myself.
+  --gen-key           | Generate key pair for remote feature.
+  EOH
 when '-v', '--version'
   puts "0.0.2"
 when '--selfupdate'
+  puts "This feature is temporally disabled."
   require 'open-uri'
   code =
     open('http://github.com/ujihisa/few/raw/master/bin/few') {|io| io.read }
@@ -41,11 +53,11 @@ when /--filetype=(\w+)/
 when '--tee', '-t', '-T'
   ARGV.shift
   Few(:tee => true, :filetype => :tee)
-when '--remote-standing', '-r', '--server'
+when '--remote-standing', '-r', '--server', '-s'
   Few.new(:remote_standing => true).start
-when '--remote-daemon', '-d'
+when '--remote-daemon', '-d','--daemon-standing', '--server-daemon'
   Few.new(:remote_standing => true).start(true)
-when '--gen-keys', '--generate-keys', '--generate-key-pair'
+when '--gen-keys', '--generate-keys', '--generate-key-pair', '--gen-key'
   print 'Generating new key pair for remote... '
   f = Few.new.generate_remote_key_pair
   puts 'done.'
