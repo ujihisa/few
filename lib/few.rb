@@ -201,7 +201,7 @@ class Few
   end
 
   def init_ftdetects
-    files = fewdirs('ftdetect') + fewdirs('ftdetect',true)
+    fewdirs('ftdetect') + fewdirs('ftdetect',true)
   end
 
   def fewdir(path,runtime=false)
