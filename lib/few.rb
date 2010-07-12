@@ -1,3 +1,5 @@
+File::NULL = '/dev/null' unless defined? File::NULL
+
 class Few
   module Util # {{{
     def open_browser(url)
@@ -6,8 +8,8 @@ class Few
         if ENV['KDE_FULL_SESSION'] == 'true'
           system 'kfmclient', 'exec', url
         elsif ENV['GNOME_DESKTOP_SESSION_ID']
-          system 'gnome-open', url, :out => "/dev/null", :err => "/dev/null"
-        elsif system("exo-open -v >& /dev/null")
+          system 'gnome-open', url, :out => File::NULL, :err => File::NULL
+        elsif system 'exo-open', '-v', :out => File::NULL, :err => File::NULL
           system 'exo-open', url
         else
           system 'firefox', url
@@ -199,7 +201,7 @@ class Few
   end
 
   def init_ftdetects
-    files = fewdirs('ftdetect') + fewdirs('ftdetect',true)
+    fewdirs('ftdetect') + fewdirs('ftdetect',true)
   end
 
   def fewdir(path,runtime=false)
@@ -237,24 +239,25 @@ class Few
     self
   end
 
-  def run(i=nil)
+  def run(i = nil)
     if @config.remote && i.nil?
-        if @opt[:tee]
-          b = ''
-          ARGF.each do |l|
-            print l
-            b += l
-          end
-          a = b
-        else
-          a = ARGF.read.toutf8
+      if @opt[:tee]
+        b = ''
+        ARGF.each do |l|
+          print l
+          b += l
         end
-        unless @remote.public_key
-          abort 'ERROR: public_key not found. If you not have keys, try generate to this command (on host): few --gen-keys, If you have keys, trans to ~/.few .'
-        end
-        unless (r = @remote.send(a)) == true
-          abort "ERROR: #{r.inspect}"
-        end
+        a = b
+      else
+        a = ARGF.read.toutf8
+      end
+      unless @remote.public_key
+        abort "ERROR: public_key is not found. If you don't have keys, try to generate one with this command on host: few --gen-keys\n" +
+          "  If you have keys, just move them to ~/.few"
+      end
+      unless (r = @remote.send(a)) == true
+        abort "ERROR: #{r.inspect}"
+      end
     else
       t = Tempfile.new('few')
 
@@ -326,7 +329,7 @@ class Few
     </div>
     <textarea col="10" row="15">
 #{r}
-    </textarea>      
+    </textarea>
   </body>
 </html>
       EOF
@@ -346,6 +349,3 @@ end
 def Few(o = {})
   Few.new(o).run
 end
-
-
-
