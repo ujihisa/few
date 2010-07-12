@@ -41,7 +41,7 @@ when /--filetype=(\w+)/
 when '--tee', '-t', '-T'
   ARGV.shift
   Few(:tee => true, :filetype => :tee)
-when '--remote-standing', '-r'
+when '--remote-standing', '-r', '--server'
   Few.new(:remote_standing => true).start
 when '--remote-daemon', '-d'
   Few.new(:remote_standing => true).start(true)
