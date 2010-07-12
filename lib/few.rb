@@ -1,3 +1,5 @@
+File::NULL = '/dev/null' unless defined? File::NULL
+
 class Few
   module Util # {{{
     def open_browser(url)
@@ -6,8 +8,8 @@ class Few
         if ENV['KDE_FULL_SESSION'] == 'true'
           system 'kfmclient', 'exec', url
         elsif ENV['GNOME_DESKTOP_SESSION_ID']
-          system 'gnome-open', url, :out => "/dev/null", :err => "/dev/null"
-        elsif system 'exo-open', '-v', :out => '/dev/null', :err => '/dev/null'
+          system 'gnome-open', url, :out => File::NULL, :err => File::NULL
+        elsif system 'exo-open', '-v', :out => File::NULL, :err => File::NULL
           system 'exo-open', url
         else
           system 'firefox', url
