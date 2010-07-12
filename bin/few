@@ -22,7 +22,7 @@ require_monad :rubygems, :markdown
 
 case ARGV[0]
 when '-h', '--help'
-  puts "[USAGE]: few [-h|--help|-v|--version|--selfupdate|--filetype={filetype}|-t|-T|--tee] [filename]"
+  puts "[USAGE]: few [-h|--help|-v|--version|--selfupdate|--filetype={filetype}|-t|-T|--tee|--server] [filename]"
   puts "[EXAMPLES]: few {filename}"
   puts "            cat {filename} | few"
   puts "            make |& few --tee"

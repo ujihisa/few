@@ -245,9 +245,9 @@ class Few
             print l
             b += l
           end
-          a = CGI.escapeHTML b
+          a = b
         else
-          a = CGI.escapeHTML ARGF.read.toutf8
+          a = ARGF.read.toutf8
         end
         unless @remote.public_key
           abort 'ERROR: public_key not found. If you not have keys, try generate to this command (on host): few --gen-keys, If you have keys, trans to ~/.few .'
