@@ -60,7 +60,7 @@ class Few
       require 'uri'
       require 'cgi'
       @opt = {
-        :private_key => nil, :public_key => nil, :remote_path => 'http://priv2.soralabo.net/few_server.rb'
+        :private_key => nil, :public_key => nil, :remote_path => 'http://sorah.cosmio.net/few_server.rb'
       }.merge(o)
       @priv_key = @opt[:private_key] ?
         OpenSSL::PKey::RSA.new(@opt[:private_key]) : nil
