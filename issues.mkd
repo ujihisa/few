@@ -2,7 +2,6 @@
 
 ## to-do
 
-- ssh over few
 - vim syntax highlight
 - markdown
 - filetype
