@@ -11,7 +11,7 @@ beautifully, it must be useful. That's the reason why `few` was created.
 ### git
 
     $ git clone http://github.com/ujihisa/few.git /install/path
-    $ export PATH=/install/path/bin:$PATH # And write it to shell rc file too
+    $ export PATH=/install/path/bin:$PATH # or to write it to shell rc file as well
     $ few --help
 
 ### Rubygems
@@ -28,7 +28,7 @@ beautifully, it must be useful. That's the reason why `few` was created.
     $ few -v
     0.0.1
 
-More usages are available in [wiki](http://wiki.github.com/ujihisa/few)
+More details of usage are available on [wiki](http://wiki.github.com/ujihisa/few)
 
 ## DEVELOPERS
 
