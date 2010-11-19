@@ -309,6 +309,7 @@ class Few
 <html>
   <head>
     <title>few: #{i.nil? ? ARGF.filename : '-'} (#{@opt[:filetype].to_s})</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <style type="text/css">
         body {
           font-family: Georgia, "menlo regular", "monaco", "courier", monospace;
