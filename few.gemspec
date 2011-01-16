@@ -11,10 +11,10 @@ Gem::Specification.new do |s|
   s.email = %q{ujihisa at gmail.com}
   s.executables = ['few']
   s.extra_rdoc_files = ["README.md"]
-  s.files = ["README.md"]
   s.homepage = %q{https://github.com/ujihisa/few}
   #s.rdoc_options = []
-  s.require_paths = ["bin"]
+  s.files = ["bin/few","lib/few.rb","few_server/few_server.rb","README.md"]
+  s.require_path = "lib"
   #s.rubygems_version = %q{1.3.4}
   s.summary = %q{more -> less -> few}
 end
