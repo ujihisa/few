@@ -315,8 +315,6 @@ class Few
           font-family: Georgia, "menlo regular", "monaco", "courier", monospace;
         }
         .few_body {
-          white-space: pre;
-          line-height: 7px;
           font-size: 12pt;
         }
 
