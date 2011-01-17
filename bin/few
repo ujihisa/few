@@ -38,7 +38,7 @@ when '-h', '--help'
   --gen-key           | Generate key pair for remote feature.
   EOH
 when '-v', '--version'
-  puts "0.0.3"
+  puts "0.0.4"
 when '--selfupdate'
   puts "This feature is temporally disabled."
   require 'open-uri'
