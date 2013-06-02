@@ -70,7 +70,7 @@ describe '`few` command' do
                       'kfmclient'
                     elsif ENV['GNOME_DESKTOP_SESSION_ID']
                       'gnome-open'
-                    elsif system("exo-open -v >& /dev/null")
+                    elsif system("exo-open -V >& /dev/null")
                       'exo-open'
                     else
                       'firefox'
